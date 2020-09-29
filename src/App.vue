@@ -1,0 +1,244 @@
+<template>
+    <div id="app">
+        <div id="top"
+             v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
+        >
+            <span class="message" v-text="'订单查询-PlanMate-APS'"/>
+            <span class="fa fa-bars menu" @click="MenuShow"/>
+
+            <el-dropdown trigger="click" class="Me">
+        <span class="el-dropdown-link" v-text="Name" style="color: white;" />
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item class="clearfix">
+                       用户设置
+                    </el-dropdown-item>
+                    <el-dropdown-item class="clearfix">
+                        <span @click="Quit">退出登录</span>
+                    </el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </div>
+        <el-menu
+                v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
+                class="el-menu-vertical-demo"
+                @open="handleOpen"
+                @close="handleClose"
+                background-color="#212529"
+                text-color="#fff"
+                id="nav"
+                router
+                default-active="1"
+                :collapse="NavShow"
+                :collapse-transition="false"
+                active-text-color="#007bff">
+            <img src="./assets/image/logo-white.png" style="height: 80px;" v-if="!NavShow" alt/>
+            <el-menu-item index="1" route="/DataCenter">
+                <i class="el-icon-menu"></i>
+                <span slot="title">订单查询</span>
+            </el-menu-item>
+            <el-submenu index="2">
+                <template slot="title">
+                    <i class="el-icon-location"></i>
+                    <span>执行计划</span>
+                </template>
+                <el-menu-item-group>
+                    <template slot="title">设备组一</template>
+                    <el-menu-item index="/Implementation"  route="/Implementation">选项1</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
+            <el-menu-item index="/History">
+                <i class="el-icon-setting"></i>
+                <span slot="title">历史数据</span>
+            </el-menu-item>
+            <el-menu-item index="/">
+                <i class="el-icon-setting"></i>
+                <span slot="title">统计中心</span>
+            </el-menu-item>
+        </el-menu>
+        <router-view/>
+    </div>
+</template>
+<script>
+    export default {
+        data() {
+            return {
+                //判断用户是否点击了右上角的用户选项
+                userBox: false
+            }
+        },
+        computed: {
+            NavShow() {
+                return this.$store.state.NavShow?false:true;
+            },
+            Name() {
+                return this.$store.state.UserMessage['empName'] || this.$cookie.get('empName');
+            }
+        },
+        methods: {
+            //用户点击用户选项
+            UserClick() {
+                this.userBox = this.userBox === false;
+            },
+            //退出的点击事件
+            Quit() {
+                this.$cookie.set("empName",null,1);
+                this.$cookie.set("sysID",null,1);
+                this.$router.push("/Select");
+                this.$router.replace('/');
+                this.userBox = false;
+            },
+            MenuShow() {
+                this.$store.state.NavShow = this.$store.state.NavShow ? false : true
+            },
+            handleOpen(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            handleClose(key, keyPath) {
+                console.log(key, keyPath);
+            }
+        }
+    }
+</script>
+<style lang="scss">
+    @import './assets/font-awesome-4.7.0/css/font-awesome.min.css';
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        user-select: none;
+
+        #app {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            width: 100%;
+            height: 100%;
+
+            #top {
+                width: 100%;
+                height: 50px;
+                position: fixed;
+                background-color: #343a40;
+                color: white;
+
+                .message {
+                    position: absolute;
+                    left: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+
+                .menu {
+                    position: absolute;
+                    left: 200px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    cursor: pointer;
+                }
+
+                .Me {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+
+                }
+
+                .userBox {
+                    position: fixed;
+                    right: 15px;
+                    top: 50px;
+                    background-color: #212529;
+                    font-size: 14px;
+                    display: none;
+                    height: 0;
+
+                    ul {
+                        li {
+                            list-style: none;
+                            height: 30px;
+                            line-height: 30px;
+                            color: white;
+                            text-align: center;
+                            padding: 0 15px;
+                        }
+                    }
+                }
+
+                .userBox.show {
+                    animation: height .2s linear forwards;
+                    -moz-animation: height .2s linear forwards; /* Firefox */
+                    -webkit-animation: height .2s linear forwards; /* Safari and Chrome */
+                    -o-animation: height .2s linear forwards; /* Opera */
+                }
+
+                @keyframes height {
+                    from {
+                        height: 0px;
+                        display: block;
+                    }
+                    to {
+                        height: 60px;
+                    }
+                }
+            }
+
+            #nav {
+                position: fixed;
+                left: 0;
+                top: 50px;
+                background-color: #212529;
+                height: calc(100% - 50px);
+                img {
+                    display: block;
+                    width: 70%;
+                    margin: 20px auto;
+                    box-sizing: border-box;
+                }
+            }
+
+            .hide {
+                display: none;
+            }
+
+            .wrap {
+                width: calc(100% - 239px);
+                margin-left: 239px;
+                padding: 0 15px;
+                padding-top: 65px;
+                min-height: 100%;
+                box-sizing: border-box;
+            }
+
+            .WrapShow {
+                width: calc(100% - 64px) !important;
+                margin-left: 64px !important;
+            }
+        }
+    }
+
+    @media screen and (max-width: 767px) {
+        #top {
+            .Me, .message {
+                font-size: 14px;
+            }
+
+            .menu {
+                left: 178px !important;
+            }
+        }
+
+        #nav {
+            display: none !important;
+        }
+        .wrap {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+    }
+</style>
