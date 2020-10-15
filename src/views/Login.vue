@@ -84,7 +84,6 @@
                         "userPass": this.UserPass
                     }
                 }).then(res => {
-                    console.log(res);
                     if (res.loginState === "1") {
                         this.$cookie.set("token", res.userGuid, 1);
                         this.$cookie.set("empID", res.empID, 1);

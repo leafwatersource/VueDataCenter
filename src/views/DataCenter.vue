@@ -2,18 +2,21 @@
     <div class="home wrap" :class="{'WrapShow':WrapShow}" v-if="[v-cloak]">
         <div class="title" v-text="'当前计划发布日期：'+ReleaseTime+'，最后计划发布人：'+Owner+'，计划发布名称：'+WorkPlanName"/>
         <div class="flexBox">
-            <div class="primaryBox">
+            <div class="primaryBox" @click="changeWorkType('EarlyPlan','提前交货订单')">
                 <span class="card-header" v-text="'提前交货订单:'+Percentage.EarlyPercentage+'%'"/>
                 <h2 v-text="Percentage.EarlyConunt+'张'"/>
             </div>
-            <div class="successBox"><span class="card-header" v-text="'正常交货订单:'+Percentage.OnTimePercentage+'%'"/>
+            <div class="successBox" @click="changeWorkType('OnTimePlan','正常交货订单')"><span class="card-header" v-text="'正常交货订单:'+Percentage.OnTimePercentage+'%'"/>
                 <h2 v-text="Percentage.OnTimeCount+'张'"/></div>
-            <div class="warningBox"><span class="card-header" v-text="'延迟订单:'+Percentage.LatePercentage+'%'"/>
+            <div class="warningBox" @click="changeWorkType('LatePlan','延迟订单')"><span class="card-header" v-text="'延迟订单:'+Percentage.LatePercentage+'%'"/>
                 <h2 v-text="Percentage.LateCount+'张'"/></div>
-            <div class="dangerBox"><span class="card-header" v-text="'异常排程订单:'+Percentage.ErrorPercentage+'%'"/>
+            <div class="dangerBox" @click="changeWorkType('ErrorPlan','异常排程订单')"><span class="card-header" v-text="'异常排程订单:'+Percentage.ErrorPercentage+'%'"/>
                 <h2 v-text="Percentage.ErrorCount+'张'"/></div>
         </div>
-        <div class="titleL"><i class="fa fa-table"/> 客户订单详情</div>
+        <div class="titleL"><i class="fa fa-table"/>
+            客户订单详情 <span @click="changeWorkType('','')">=》{{workType.title}}</span>
+            <span v-if="workItemType.title"> =》{{workItemType.title}}</span>
+        </div>
         <div id="table">
             <button class="filterBtn" @click="filterShow">高级筛选</button>
             <button class="exportBtn">导出数据</button>
@@ -63,17 +66,6 @@
                             show-overflow-tooltip
                             :min-width="120"
                             align="center"
-                            v-if="item == '工单号码'"
-                    />
-                    <el-table-column
-                            :key="item"
-                            :prop="item"
-                            :label="item"
-                            sortable
-                            show-overflow-tooltip
-                            :min-width="120"
-                            align="center"
-                            v-else
                     />
                 </template>
             </el-table>
@@ -100,6 +92,8 @@
                 ReleaseTime: '',
                 Owner: '',
                 WorkPlanName: '',
+                workType:{type:'',title:'全部工单'},
+                workItemType:{type:'',title:''},
                 Percentage: {
                     EarlyConunt: '',
                     EarlyPercentage: '',
@@ -123,7 +117,7 @@
                 tableData: [],
                 value: '',
                 search: '',
-                filterBox: false,
+                filterBox: false,//是否显示精确筛选的框
                 fuzzyFilter: '',//模糊筛选
                 filterjs: null,//精确筛选的对象
             }
@@ -165,7 +159,8 @@
                     this.getTableColumn();
                 });
             },
-            getDataCenterData(pageSize, curPage, filter, fuzzyFilter = this.fuzzyFilter) {
+            getDataCenterData(pageSize, curPage, filter,) {
+
                 //获取表格的数据
                 this.tableData = [];
                 this.$http({
@@ -174,7 +169,8 @@
                         "PageSize": pageSize ? pageSize : "20",
                         "CurPage": curPage ? curPage : "1",
                         "filter": filter ? JSON.stringify(filter) : null,
-                        "fuzzyFilter": fuzzyFilter
+                        "fuzzyFilter": this.fuzzyFilter,
+                        "workType":this.workItemType.type?this.workItemType.type:''
                     },
                 }).then(res => {
                     res.data = JSON.parse(res.data);
@@ -199,7 +195,6 @@
                     let data = JSON.stringify(res).split(',');
                     this.columnsData = [];
                     this.columnsJson = res;
-                    console.log(res);
                     data.forEach(item => {
                         let itemData = item.split(':')[1];
                         var reg = new RegExp('"', "g");
@@ -214,13 +209,13 @@
             },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs);
             },
             handleSizeChange: function (size) {
                 //table的页数发生改变触发事件
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs);
             },
             filterShow() {
                 //高级筛选的按钮的点击事件
@@ -261,6 +256,12 @@
                 this.currentPage = 1;
                 console.log(this.fuzzyFilter);
                 this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter.trim());
+            },
+            changeWorkType(type,title){
+                this.workItemType.title = title;
+                this.workItemType.type = type;
+                this.currentPage = 1;
+                this.getDataCenterData();
             }
         }
     }
@@ -288,7 +289,6 @@
             font-size: 14px;
             overflow: hidden;
         }
-
         .titleL {
             text-align: left;
         }

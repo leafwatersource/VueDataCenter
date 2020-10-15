@@ -42,7 +42,7 @@
                     <span>执行计划</span>
                 </template>
                 <el-menu-item-group>
-                    <el-menu-item index="/Implementation" route="/Implementation" v-for="item in ImplementationData"
+                    <el-menu-item index="/Implementation" route="/Implementation" v-for="item in ImplementationResGroup"
                                   :key="item.viewname" v-text="item.viewname"
                                   :data="item.viewname"
                                   @click="ImplementationClick"
@@ -62,15 +62,16 @@
     </div>
 </template>
 <script>
+    import {mapState,mapMutations} from 'vuex'
     export default {
         data() {
             return {
                 //判断用户是否点击了右上角的用户选项
                 userBox: false,
-                ImplementationData: [],
             }
         },
         computed: {
+            ...mapState(['ImplementationResGroup']),
             NavShow() {
                 return this.$store.state.NavShow ? false : true;
             },
@@ -80,7 +81,6 @@
         },
         watch: {
             $route(to) {
-                console.log(to.path);
                 if (to.path.indexOf('/DataCenter') != -1 || to.path.indexOf('/history') != -1) {
                     this.GetImplementationData();
                 }
@@ -91,9 +91,11 @@
                 window.location.hash.toLowerCase().indexOf('implementation') != -1) {
                 this.GetImplementationData();
             }
+
         }
         ,
         methods: {
+            ...mapMutations(['ChangeImplementationResGroup','ChangeCurImplementationResGroup']),
             GetImplementationData() {
                 this.$http({
                     url: "ViewGroup"
@@ -101,13 +103,20 @@
                     if (res.status == 1) {
                         res.groupList = JSON.parse(res.groupList);
                     }
-                    this.ImplementationData = res.groupList;
+                    this.ChangeImplementationResGroup(res.groupList);
+                    this.ChangeCurImplementationResGroup(res.groupList[0]['viewname']);
                 });
 
             }
             ,
             ImplementationClick(e){
-                console.log(e.$attrs.data)
+                this.ChangeCurImplementationResGroup(e.$attrs.data);
+                // this.$http({
+                //     url:"ResView",
+                //     data:{}
+                // }).then(res=>{
+                //     console.log(res)
+                // })
             },
             //用户点击用户选项
             UserClick() {
