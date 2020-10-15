@@ -4,9 +4,9 @@ import qs from 'qs'
 import cookie from 'vue-cookie'
 
 
-var api = 'http://pmser.szratetec.com:8088/';
-// var api = 'https://localhost:44309/';
-
+// var api = 'http://pmser.szratetec.com:8088/';
+var api = 'https://localhost:44309/';
+// var api = 'http://tenglongapi.szratetec.cn/';
 
 const http = options => {
     return new Promise((resolve, reject) => {

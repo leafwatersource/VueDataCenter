@@ -7,10 +7,10 @@
             <span class="fa fa-bars menu" @click="MenuShow"/>
 
             <el-dropdown trigger="click" class="Me">
-        <span class="el-dropdown-link" v-text="Name" style="color: white;" />
+                <span class="el-dropdown-link" v-text="Name" style="color: white;"/>
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item class="clearfix">
-                       用户设置
+                        用户设置
                     </el-dropdown-item>
                     <el-dropdown-item class="clearfix">
                         <span @click="Quit">退出登录</span>
@@ -42,18 +42,21 @@
                     <span>执行计划</span>
                 </template>
                 <el-menu-item-group>
-                    <template slot="title">设备组一</template>
-                    <el-menu-item index="/Implementation"  route="/Implementation">选项1</el-menu-item>
+                    <el-menu-item index="/Implementation" route="/Implementation" v-for="item in ImplementationData"
+                                  :key="item.viewname" v-text="item.viewname"
+                                  :data="item.viewname"
+                                  @click="ImplementationClick"
+                    />
                 </el-menu-item-group>
             </el-submenu>
-            <el-menu-item index="/History">
+            <el-menu-item index="/history">
                 <i class="el-icon-setting"></i>
                 <span slot="title">历史数据</span>
             </el-menu-item>
-            <el-menu-item index="/">
-                <i class="el-icon-setting"></i>
-                <span slot="title">统计中心</span>
-            </el-menu-item>
+            <!--<el-menu-item index="/">-->
+            <!--<i class="el-icon-setting"></i>-->
+            <!--<span slot="title">统计中心</span>-->
+            <!--</el-menu-item>-->
         </el-menu>
         <router-view/>
     </div>
@@ -63,36 +66,71 @@
         data() {
             return {
                 //判断用户是否点击了右上角的用户选项
-                userBox: false
+                userBox: false,
+                ImplementationData: [],
             }
         },
         computed: {
             NavShow() {
-                return this.$store.state.NavShow?false:true;
+                return this.$store.state.NavShow ? false : true;
             },
             Name() {
                 return this.$store.state.UserMessage['empName'] || this.$cookie.get('empName');
+            },
+        },
+        watch: {
+            $route(to) {
+                console.log(to.path);
+                if (to.path.indexOf('/DataCenter') != -1 || to.path.indexOf('/history') != -1) {
+                    this.GetImplementationData();
+                }
             }
         },
+        mounted() {
+            if (window.location.hash.toLowerCase().indexOf('datacenter') != -1 || window.location.hash.toLowerCase().indexOf('history') != -1||
+                window.location.hash.toLowerCase().indexOf('implementation') != -1) {
+                this.GetImplementationData();
+            }
+        }
+        ,
         methods: {
+            GetImplementationData() {
+                this.$http({
+                    url: "ViewGroup"
+                }).then(res => {
+                    if (res.status == 1) {
+                        res.groupList = JSON.parse(res.groupList);
+                    }
+                    this.ImplementationData = res.groupList;
+                });
+
+            }
+            ,
+            ImplementationClick(e){
+                console.log(e.$attrs.data)
+            },
             //用户点击用户选项
             UserClick() {
                 this.userBox = this.userBox === false;
-            },
+            }
+            ,
             //退出的点击事件
             Quit() {
-                this.$cookie.set("empName",null,1);
-                this.$cookie.set("sysID",null,1);
+                this.$cookie.set("empName", null, 1);
+                this.$cookie.set("sysID", null, 1);
                 this.$router.push("/Select");
                 this.$router.replace('/');
                 this.userBox = false;
-            },
+            }
+            ,
             MenuShow() {
-                this.$store.state.NavShow = this.$store.state.NavShow ? false : true
-            },
+                this.$store.state.NavShow = this.$store.state.NavShow ? false : true;
+            }
+            ,
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);
-            },
+            }
+            ,
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
             }
@@ -106,6 +144,7 @@
         margin: 0;
         padding: 0;
     }
+
     html,
     body {
         width: 100%;
@@ -146,7 +185,6 @@
                     right: 15px;
                     top: 50%;
                     transform: translateY(-50%);
-
                 }
 
                 .userBox {
@@ -194,6 +232,7 @@
                 top: 50px;
                 background-color: #212529;
                 height: calc(100% - 50px);
+
                 img {
                     display: block;
                     width: 70%;

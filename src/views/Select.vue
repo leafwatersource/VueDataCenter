@@ -59,6 +59,8 @@
                 });
             },
             datacenterClick() {
+                console.log(111111);
+                console.log(this.funList);
                 if (this.funList.indexOf('datacenter') !== -1) {
                     this.$router.replace('/DataCenter')
                 } else {

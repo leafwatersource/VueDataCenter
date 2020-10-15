@@ -12,7 +12,7 @@ Vue.use(VueRouter);
 const routes = [{
         path: '/',
         name: 'Login',
-        meta: { navShow: false,title:'登录' },
+        meta: { navShow: false,title:'用户登录' },
         component: Login,
     },
     {
@@ -62,7 +62,7 @@ const routes = [{
 ];
 
 const router = new VueRouter({
-    mode: 'history',
+    mode: 'hash',
     routes,
 });
 

@@ -14,7 +14,31 @@
                 <h2 v-text="Percentage.ErrorCount+'张'"/></div>
         </div>
         <div class="titleL"><i class="fa fa-table"/> 客户订单详情</div>
-        <div id="table" style="margin-top: 15px;">
+        <div id="table">
+            <button class="filterBtn" @click="filterShow">高级筛选</button>
+            <button class="exportBtn">导出数据</button>
+            <div class="filterBox" :class="{'show':filterBox}">
+                <p>* 请选择筛选条件 <i class="fa fa-times" aria-hidden="true" @click="closeFilter"></i></p>
+                <div class="conMain">
+                    <div class="con" v-for="(value,key) in columnsJson" :key="key">
+                        <div class="cLeft" v-text="value+':'"/>
+                        <div class="cRight" v-if="key==='planStartTime'?true:false">
+                            <input type="text" :data="key">
+                        </div>
+                        <div class="cRight" v-else>
+                            <input type="text" :data="key">
+                        </div>
+                    </div>
+                </div>
+                <div class="filterBtnGroup">
+                    <div class="btnCon">
+                        <button class="reset" @click="filterReset" v-text="'重置'"/>
+                        <button class="confirm" @click="confirm" v-text="'搜索'"/>
+                    </div>
+                </div>
+
+            </div>
+            <input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">
             <el-table
                     :data="tableData"
                     border
@@ -26,6 +50,10 @@
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
             >
+                <el-input
+                        v-model="search"
+                        size="mini"
+                        placeholder="输入关键字搜索"/>
                 <template v-for="item in columnsData">
                     <el-table-column
                             :key="item"
@@ -85,6 +113,7 @@
                 tableCount: 0,
                 currentPage: 1,
                 columnsData: [],
+                columnsJson: {},
                 pageSize: 20,
                 curPage: 1,
                 pagesize: 20,
@@ -92,7 +121,11 @@
                 tableOffset: null,
                 loading: false,
                 tableData: [],
-                value: ''
+                value: '',
+                search: '',
+                filterBox: false,
+                fuzzyFilter: '',//模糊筛选
+                filterjs: null,//精确筛选的对象
             }
         },
         computed: {
@@ -105,13 +138,13 @@
         },
         mounted() {
             this.getPlanMessage();
+            //计算表格的高度
             let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
             let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
-            this.tableOffset = wrapH - offsetTop - 32;
-
-
+            this.tableOffset = wrapH - offsetTop - 32 - 60;
         },
         methods: {
+
             //获取工单的描述
             getPlanMessage() {
                 this.$http({
@@ -132,20 +165,23 @@
                     this.getTableColumn();
                 });
             },
-            getDataCenterData(pageSize, curPage) {
+            getDataCenterData(pageSize, curPage, filter, fuzzyFilter = this.fuzzyFilter) {
+                //获取表格的数据
                 this.tableData = [];
                 this.$http({
                     url: 'DataCenter',
                     data: {
                         "PageSize": pageSize ? pageSize : "20",
-                        "CurPage": curPage ? curPage : "1"
+                        "CurPage": curPage ? curPage : "1",
+                        "filter": filter ? JSON.stringify(filter) : null,
+                        "fuzzyFilter": fuzzyFilter
                     },
                 }).then(res => {
                     res.data = JSON.parse(res.data);
                     for (let i = 0; i < res.data.length; i++) {
-                        res.data[i]['需求日期'] = this.foramateDate(res.data[i]['需求日期']);
-                        res.data[i]['计划开始时间'] = this.formateTime(res.data[i]['计划开始时间']);
-                        res.data[i]['计划结束时间'] = this.formateTime(res.data[i]['计划结束时间']);
+                        res.data[i]['需求日期'] = this.$Fun.foramateDate(res.data[i]['需求日期']);
+                        res.data[i]['计划开始时间'] = this.$Fun.formateTime(res.data[i]['计划开始时间']);
+                        res.data[i]['计划结束时间'] = this.$Fun.formateTime(res.data[i]['计划结束时间']);
                     }
                     this.tableData.push(...res.data);
                     this.tableCount = res.total;
@@ -153,6 +189,7 @@
 
             },
             getTableColumn() {
+                //获取表格的列
                 this.$http({
                     url: "TableFiled",
                     data: {
@@ -161,9 +198,11 @@
                 }).then(res => {
                     let data = JSON.stringify(res).split(',');
                     this.columnsData = [];
+                    this.columnsJson = res;
+                    console.log(res);
                     data.forEach(item => {
                         let itemData = item.split(':')[1];
-                        var reg = new RegExp('"', "g")
+                        var reg = new RegExp('"', "g");
                         itemData = itemData.replace(reg, '');
                         if (itemData.indexOf('}') !== -1) {
                             itemData = itemData.replace('}', '');
@@ -175,35 +214,56 @@
             },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
-                this.getDataCenterData(this.pagesize, this.currentPage);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
             },
             handleSizeChange: function (size) {
+                //table的页数发生改变触发事件
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.getDataCenterData(this.pagesize, this.currentPage);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
             },
-            foramateDate(time) {
-                if (time) {
-                    var datetime = new Date(time);
-                    var year = datetime.getFullYear();
-                    var month = datetime.getMonth() + 1;
-                    var date = datetime.getDate();
-                    return year + '/' + month + '/' + date;
-                }
+            filterShow() {
+                //高级筛选的按钮的点击事件
+                this.filterBox = this.filterBox ? false : true;
             },
-            formateTime(time) {
-                if (time) {
-                    var datetime = new Date(time);
-                    var year = datetime.getFullYear();
-                    var month = datetime.getMonth() + 1;
-                    var date = datetime.getDate();
-                    var hour = datetime.getHours() > 9 ? datetime.getHours() : '0' + datetime.getHours();
-                    var min = datetime.getMinutes() > 9 ? datetime.getMinutes() : '0' + datetime.getMinutes();
-                    return year + '/' + month + '/' + date + ' ' + hour + ':' + min;
-                }
+            closeFilter() {
+                //高级筛选框的关闭按钮
+                this.filterBox = false;
+            },
+            filterReset() {
+                //高级筛选的重置按钮
+                let cRight = document.querySelectorAll('.cRight');
+                cRight.forEach(item => {
+                    item.children[0].value = ''
+                });
+                this.filterjs = null;
+                this.getDataCenterData();
+                this.closeFilter();
+            },
+            confirm() {
+                //高级筛选的确定按钮
+                let cRight = document.querySelectorAll('.cRight');
+                this.filterjs = {};
+                cRight.forEach(item => {
+                    let inputVal = item.children[0].value.trim();
+                    let inputAttr = item.children[0].attributes['data'].value;
+                    if (inputVal != '') {
+                        this.filterjs [inputAttr] = inputVal;
+                    }
+                });
+                this.currentPage = 1;
+                console.log(this.filterjs);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
+                this.closeFilter();
+            },
+            fuzzyInp() {
+                //模糊筛选的input事件
+                this.currentPage = 1;
+                console.log(this.fuzzyFilter);
+                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter.trim());
             }
         }
-    };
+    }
 </script>
 <style lang="scss" scoped>
     [v-cloak] {
@@ -276,6 +336,152 @@
             h2 {
                 color: white;
                 text-align: right;
+            }
+        }
+
+        #table {
+            position: relative;
+            margin-top: 15px;
+
+            .filterBtn, .exportBtn {
+                padding: 6px;
+                font-size: 12px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-weight: 400;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                margin-bottom: 8px;
+                outline: none;
+            }
+
+            .exportBtn {
+                margin-right: 12px;
+                float: right;
+            }
+
+            .filterBox {
+                display: none;
+                position: absolute;
+                left: 0;
+                top: 30px;
+                z-index: 10000;
+                height: 260px;
+                background-color: white;
+                border: 1px solid #808080;
+                width: 300px;
+                border-radius: 4px;
+
+                p {
+                    width: 100%;
+                    padding: 4px;
+                    color: #17a2b8;
+                    border-bottom: 1px solid #808080;
+                    font-size: 14px;
+                    -webkit-box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+
+                    i {
+                        float: right;
+                    }
+                }
+
+                .conMain {
+                    height: 190px;
+                    overflow-x: hidden;
+                    overflow-y: scroll;
+
+                    .con {
+                        width: 100%;
+                        margin: 4px 0;
+
+                        .cLeft {
+                            width: 40%;
+                            float: left;
+                            padding: 4px;
+                            font-size: 12px;
+                            white-space: nowrap;
+                            box-sizing: border-box;
+                        }
+
+                        .cRight {
+                            float: right;
+                            width: 60%;
+                            box-sizing: border-box;
+                            padding: 0 4px;
+
+                            input {
+                                border: 1px solid #ced4da;
+                                border-radius: 4px;
+                                box-sizing: border-box;
+                                width: 100%;
+                                padding: 4px;
+                            }
+                        }
+                    }
+
+                    .con:after {
+                        display: block;
+                        content: '';
+                        clear: both;
+                    }
+                }
+
+                .conMain::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .filterBtnGroup {
+                    background-color: white;
+                    position: absolute;
+                    bottom: 0;
+                    border-top: 1px solid #808080;
+                    width: 100%;
+                    padding: 4px 0;
+
+                    .btnCon {
+                        display: block;
+                        width: 50%;
+                        margin: 0 auto;
+
+                        .reset {
+                            color: #fff;
+                            background-color: #dc3545;
+                            border-color: #dc3545;
+                            outline: none;
+                            border: none;
+                            font-size: 12px;
+                            width: 50px;
+                            padding: 4px 0;
+                        }
+
+                        .confirm {
+                            color: #fff;
+                            background-color: #28a745;
+                            border-color: #28a745;
+                            outline: none;
+                            border: none;
+                            font-size: 12px;
+                            width: 50px;
+                            padding: 4px 0;
+                            float: right;
+                        }
+                    }
+
+                }
+            }
+
+            .show {
+                display: block;
+            }
+
+            .fuzzyInp {
+                margin-left: 10px;
+                padding: 4px;
             }
         }
     }

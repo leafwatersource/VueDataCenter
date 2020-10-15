@@ -94,7 +94,7 @@
 					this.tableData = [];
 					res.data['rows'] = JSON.parse(res.data['rows']);
 					for (let i = 0; i < res.data['rows'].length; i++) {
-						res.data['rows'][i]['事件时间'] = this.formateTime(res.data['rows'][i]['事件时间']);
+						res.data['rows'][i]['事件时间'] = this.$Fun.formateTime(res.data['rows'][i]['事件时间']);
 						this.tableData.push(res.data['rows'][i]);
 					}
 				})
@@ -108,17 +108,6 @@
 				this.currentPage = 1;
 				this.getTableData(this.pagesize, this.currentPage);
 			},
-			formateTime(time) {
-				if (time) {
-					var datetime = new Date(time);
-					var year = datetime.getFullYear();
-					var month = datetime.getMonth() + 1;
-					var date = datetime.getDate();
-					var hour = datetime.getHours() > 9 ? datetime.getHours() : '0' + datetime.getHours();
-					var min = datetime.getMinutes() > 9 ? datetime.getMinutes() : '0' + datetime.getMinutes();
-					return year + '/' + month + '/' + date + ' ' + hour + ':' + min;
-				}
-			}
 		}
 	}
 </script>
