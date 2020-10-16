@@ -111,12 +111,6 @@
             ,
             ImplementationClick(e){
                 this.ChangeCurImplementationResGroup(e.$attrs.data);
-                // this.$http({
-                //     url:"ResView",
-                //     data:{}
-                // }).then(res=>{
-                //     console.log(res)
-                // })
             },
             //用户点击用户选项
             UserClick() {
@@ -173,7 +167,7 @@
                 position: fixed;
                 background-color: #343a40;
                 color: white;
-
+                z-index: 10;
                 .message {
                     position: absolute;
                     left: 15px;
@@ -216,7 +210,6 @@
                         }
                     }
                 }
-
                 .userBox.show {
                     animation: height .2s linear forwards;
                     -moz-animation: height .2s linear forwards; /* Firefox */
@@ -241,7 +234,7 @@
                 top: 50px;
                 background-color: #212529;
                 height: calc(100% - 50px);
-
+                z-index: 10;
                 img {
                     display: block;
                     width: 70%;
