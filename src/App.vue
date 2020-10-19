@@ -19,6 +19,7 @@
             </el-dropdown>
         </div>
         <el-menu
+                :default-active="defaultActiveIndex"
                 v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
                 class="el-menu-vertical-demo"
                 @open="handleOpen"
@@ -27,7 +28,6 @@
                 text-color="#fff"
                 id="nav"
                 router
-                default-active="1"
                 :collapse="NavShow"
                 :collapse-transition="false"
                 active-text-color="#007bff">
@@ -53,10 +53,10 @@
                 <i class="el-icon-setting"></i>
                 <span slot="title">历史数据</span>
             </el-menu-item>
-            <!--<el-menu-item index="/">-->
-            <!--<i class="el-icon-setting"></i>-->
-            <!--<span slot="title">统计中心</span>-->
-            <!--</el-menu-item>-->
+            <el-menu-item index="/Statistics">
+            <i class="el-icon-mobile-phone"></i>
+            <span slot="title">统计中心</span>
+            </el-menu-item>
         </el-menu>
         <router-view/>
     </div>
@@ -66,6 +66,7 @@
     export default {
         data() {
             return {
+                defaultActiveIndex:'1',
                 //判断用户是否点击了右上角的用户选项
                 userBox: false,
             }
@@ -78,6 +79,11 @@
             Name() {
                 return this.$store.state.UserMessage['empName'] || this.$cookie.get('empName');
             },
+        },
+        created() {
+            // 组件创建完后获取数据，
+            // 此时 data 已经被 observed 了
+            this.fetchData()
         },
         watch: {
             $route(to) {
@@ -136,7 +142,11 @@
             ,
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
-            }
+            },
+            fetchData () {
+                var cur_path = this.$route.path; //获取当前路由
+                this.defaultActiveIndex = cur_path;
+            },
         }
     }
 </script>

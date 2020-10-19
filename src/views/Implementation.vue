@@ -22,7 +22,6 @@
             <span v-text="'&lt; '+resource" />
         </div>
         <div id="table">
-
             <!--<input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">-->
             <el-table
                     :data="tableData"

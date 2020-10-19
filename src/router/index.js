@@ -7,6 +7,7 @@ import Implementation from '../views/Implementation.vue'
 import Select from '../views/Select.vue'
 import NotFound from '../views/NotFound.vue'
 import Error from '../views/Error'
+import Statistics from '../views/Statistics'
 Vue.use(VueRouter);
 
 const routes = [{
@@ -46,6 +47,14 @@ const routes = [{
         component: History,
         meta: {
             title:'历史数据'
+        }
+    },
+    {
+        path:'/Statistics',
+        name:'Statistics',
+        component:Statistics,
+        meta:{
+            title:'统计中心'
         }
     },
     {

@@ -10,9 +10,11 @@ import http from './util/http'
 import Fun from './util/publicFun'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import echarts from 'echarts'
 
 Vue.prototype.$http=http;
 Vue.prototype.$Fun = Fun;
+Vue.prototype.$echarts = echarts;
 Vue.use(VXETable);
 Vue.use(ElementUI);
 Vue.prototype.$cookie = cookie; //配置时候prototype.$这里的名字自己定义不是固定是cookie
