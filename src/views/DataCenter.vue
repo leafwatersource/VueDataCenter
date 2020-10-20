@@ -49,7 +49,7 @@
                     ref="filterTable"
                     :fit="true"
                     :default-sort="{prop: 'date', order: 'descending'}"
-                    style="width: 100%"
+                    style="width: 100%;min-height:500px;"
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
             >
@@ -247,14 +247,12 @@
                     }
                 });
                 this.currentPage = 1;
-                console.log(this.filterjs);
                 this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
                 this.closeFilter();
             },
             fuzzyInp() {
                 //模糊筛选的input事件
                 this.currentPage = 1;
-                console.log(this.fuzzyFilter);
                 this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter.trim());
             },
             changeWorkType(type,title){

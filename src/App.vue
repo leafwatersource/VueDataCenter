@@ -42,8 +42,10 @@
                     <span>执行计划</span>
                 </template>
                 <el-menu-item-group>
-                    <el-menu-item index="/Implementation" route="/Implementation" v-for="item in ImplementationResGroup"
-                                  :key="item.viewname" v-text="item.viewname"
+                    <el-menu-item :index="'/Implementation/'+item.viewname" :route="'/Implementation/'+item.viewname"
+                                  v-for="item in ImplementationResGroup"
+                                  :key="item.viewname"
+                                  v-text="item.viewname"
                                   :data="item.viewname"
                                   @click="ImplementationClick"
                     />
@@ -53,20 +55,30 @@
                 <i class="el-icon-setting"></i>
                 <span slot="title">历史数据</span>
             </el-menu-item>
-            <el-menu-item index="/Statistics">
-            <i class="el-icon-mobile-phone"></i>
-            <span slot="title">统计中心</span>
-            </el-menu-item>
+
+            <el-submenu index="4">
+                <template slot="title">
+                    <i class="el-icon-location"></i>
+                    <span>统计中心</span>
+                </template>
+                <el-menu-item-group>
+                    <el-menu-item index="/Statistics">设备状态</el-menu-item>
+                    <el-menu-item index="/Statistics">设备负载</el-menu-item>
+                    <el-menu-item index="/Statistics">生产达成</el-menu-item>
+                    <el-menu-item index="/Statistics">订单生产进度</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
         </el-menu>
         <router-view/>
     </div>
 </template>
 <script>
-    import {mapState,mapMutations} from 'vuex'
+    import {mapState, mapMutations} from 'vuex'
+
     export default {
         data() {
             return {
-                defaultActiveIndex:'1',
+                defaultActiveIndex: '1',
                 //判断用户是否点击了右上角的用户选项
                 userBox: false,
             }
@@ -93,7 +105,7 @@
             }
         },
         mounted() {
-            if (window.location.hash.toLowerCase().indexOf('datacenter') != -1 || window.location.hash.toLowerCase().indexOf('history') != -1||
+            if (window.location.hash.toLowerCase().indexOf('datacenter') != -1 || window.location.hash.toLowerCase().indexOf('history') != -1 ||
                 window.location.hash.toLowerCase().indexOf('implementation') != -1) {
                 this.GetImplementationData();
             }
@@ -101,7 +113,7 @@
         }
         ,
         methods: {
-            ...mapMutations(['ChangeImplementationResGroup','ChangeCurImplementationResGroup']),
+            ...mapMutations(['ChangeImplementationResGroup', 'ChangeCurImplementationResGroup']),
             GetImplementationData() {
                 this.$http({
                     url: "ViewGroup"
@@ -115,7 +127,7 @@
 
             }
             ,
-            ImplementationClick(e){
+            ImplementationClick(e) {
                 this.ChangeCurImplementationResGroup(e.$attrs.data);
             },
             //用户点击用户选项
@@ -143,7 +155,7 @@
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
             },
-            fetchData () {
+            fetchData() {
                 var cur_path = this.$route.path; //获取当前路由
                 this.defaultActiveIndex = cur_path;
             },
@@ -178,6 +190,7 @@
                 background-color: #343a40;
                 color: white;
                 z-index: 10;
+
                 .message {
                     position: absolute;
                     left: 15px;
@@ -220,6 +233,7 @@
                         }
                     }
                 }
+
                 .userBox.show {
                     animation: height .2s linear forwards;
                     -moz-animation: height .2s linear forwards; /* Firefox */
@@ -245,6 +259,7 @@
                 background-color: #212529;
                 height: calc(100% - 50px);
                 z-index: 10;
+                overflow-y: scroll;
                 img {
                     display: block;
                     width: 70%;
@@ -252,7 +267,9 @@
                     box-sizing: border-box;
                 }
             }
-
+            #nav::-webkit-scrollbar{
+                display: none;
+            }
             .hide {
                 display: none;
             }
