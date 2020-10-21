@@ -99,17 +99,18 @@
         },
         watch: {
             $route(to) {
-                if (to.path.indexOf('/DataCenter') != -1 || to.path.indexOf('/history') != -1) {
+                // if (to.path.indexOf('/DataCenter') != -1 || to.path.indexOf('/history') != -1) {
+                //     this.GetImplementationData();
+                // }
+                if (to.path!='#/Select'&&to.path!='#/'&&to.path!='/') {
                     this.GetImplementationData();
                 }
             }
         },
         mounted() {
-            if (window.location.hash.toLowerCase().indexOf('datacenter') != -1 || window.location.hash.toLowerCase().indexOf('history') != -1 ||
-                window.location.hash.toLowerCase().indexOf('implementation') != -1) {
+            if (window.location.hash!='#/Select'&&window.location.hash!='#/'&&window.location.hash!='/') {
                 this.GetImplementationData();
             }
-
         }
         ,
         methods: {
@@ -139,7 +140,6 @@
             Quit() {
                 this.$cookie.set("empName", null, 1);
                 this.$cookie.set("sysID", null, 1);
-                this.$router.push("/Select");
                 this.$router.replace('/');
                 this.userBox = false;
             }

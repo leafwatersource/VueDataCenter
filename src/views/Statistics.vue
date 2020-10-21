@@ -4,48 +4,65 @@
         <div class="inputBox">请输入设备名称 <input type="text" placeholder="请输入设备名称"></div>
         <div class="top">
             <div class="topCon">
-                <div class="res" @contextmenu.prevent="show($event)">
-                    <span>设备名称：外发厂</span>
-                    <span>生产中：7641546578652153467465416754</span>
+                <div class="res" v-for="item in resStatus" :key="item.resname"
+                     @click="resClick(item)"
+                     :data="item"
+                     :class="{'resK':item.resType=='0'?true:false,'Error':item.resType=='3'?true:false}">
+                    <span v-text="'设备名称:'+item.resname" />
+                    <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate" />
+                    <span v-else v-text="item.resstate" />
                 </div>
-                <div class="res" @contextmenu.prevent="show($event)">
-                    <span>98645346545645456</span>
-                    <span>换线中</span>
-                </div>
-                <div class="res">
-                    <span>98645346545645456</span>
-                    <span>异常设备</span>
-                </div>
+
             </div>
         </div>
         <div class="main">
-            设备的统计图
+            <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname" />
         </div>
     </div>
 </template>
 
 <script>
+    import {mapState} from 'vuex'
+    import cookie from 'vue-cookie'
     export default {
         name: "Statistics",
-        data(){
-           return {
-               clientX:null,
-               clientY:null,
-               rightShow:false,
-           }
+        data() {
+            return {
+                resStatus:[],
+                curRes:''
+            }
         },
         computed: {
             /**
              * @return {boolean}
              */
+            ...mapState(['UserMessage']),
             WrapShow() {
                 return !this.$store.state.NavShow;
             }
         },
         mounted() {
+            this.GetResStatus();
         },
-        methods:{
-
+        methods: {
+            GetResStatus(){
+                //获取设备状态
+                console.log(this.UserMessage);
+                this.$http({
+                    url:"GetResStatus",
+                    data:{
+                        'empid':cookie.get('empID')
+                    }
+                }).then(res=>{
+                    this.resStatus = [];
+                    this.resStatus = res;
+                    this.curRes = res[0];
+                })
+            },
+            resClick(item){
+                //设备的点击事件
+                this.curRes = item;
+            }
         }
     }
 </script>
@@ -54,17 +71,21 @@
     .top {
         width: 100%;
         height: 400px;
+        overflow-y: hidden;
+        padding: 10px 0;
         .topCon {
             width: 100%;
             height: 100%;
-            padding: 10px 0;
             overflow-y: scroll;
             display: flex;
             flex-wrap: wrap;
+            flex-direction: row;
+           align-content: flex-start;
             scrollbar-width: none; /* Firefox */
-            .res{
+            .res {
                 height: 50px;
                 background-color: #018578;
+                margin: 4px 0;
                 margin-right: 10px;
                 padding: 10px;
                 display: flex;
@@ -73,20 +94,24 @@
                 border-radius: 4px;
                 box-shadow: 1px 1px 5px #cccccc;
                 cursor: pointer;
-                span{
+                span {
                     font-size: 12px;
-                    color:white;
+                    color: white;
                     font-weight: 600;
                 }
             }
-            .Error{
-                background-color:red;
+            .Error {
+                background-color: #cd2626;
             }
-            .res:hover{
+            .resK{
+                background-color: #bababa;
+            }
+            .res:hover {
                 background-color: #343a40;
                 color: white;
             }
         }
+
         .topCon::-webkit-scrollbar {
             display: none; /* Chrome Safari */
         }

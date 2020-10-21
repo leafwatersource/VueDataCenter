@@ -60,8 +60,14 @@
                             "pwd": this.UserPass
                         }
                     }).then(res => {
+                        console.log(res);
                         if (res.loginState !== "0") {
-                            this.LoginState = false;
+                            if(res.loginState=="1"){
+                                this.$router.push("/Select");
+                                return;
+                            }else {
+                                this.LoginState = false;
+                            }
                         }
                         this.ErrorMessage = res.message;
                     }, err => {
