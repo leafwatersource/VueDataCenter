@@ -6,7 +6,6 @@
                 <i class="fa fa-laptop"/>
                 <p v-text="'当前设备组:'+CurImplementationResGroup"/>
                 <input type="text" class="SerachRes" placeholder="请输入设备" @input="SerachRes" v-model="Serachres">
-                <!--<div class="all">所有设备工单</div>-->
                 <div class="more" @click="more">展开</div>
             </div>
             <div class="resBody" :class="{'resBodyShow':resBodyShow}">
@@ -16,11 +15,13 @@
                 </ul>
             </div>
         </div>
-        <div class="CurResDetail">
+        <div class="CurResDetail" style="position">
             <i class="fa fa-table"></i>
             <span>当前计划详情</span>
             <p class="all" @click="allRes">所有设备</p>
             <span v-if="resource" v-text="'&gt; '+resource" />
+            <span v-text="'&gt; 换模计划'" v-if="changeModelFlag"></span>
+            <span style="position: absolute;right: 15px;" @click="ChangeModel">换模计划</span>
         </div>
         <div id="table">
             <!--<input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">-->
@@ -76,7 +77,8 @@
                 tableData: [],
                 columnsData: {},
                 tableOffset: null,
-                Serachres: ''
+                Serachres: '',
+                changeModelFlag:false
             }
         },
         computed: {
@@ -93,6 +95,7 @@
             CurImplementationResGroup() {
                 this.GetResView();
                 this.Serachres = '';
+                this.changeModelFlag = false;
             },
         },
         mounted() {
@@ -131,20 +134,22 @@
                     document.getElementsByClassName('active')[0].classList.remove('active');
                 }
                 e.target.setAttribute('class', 'active');
+                this.changeModelFlag = false;
                 let resource = e.target.innerText;
                 this.resource = resource;
                 this.ResWorkView(resource);
                 this.tableData = [];
                 this.currentPage = 1;
             },
-            ResWorkView(resource, pageSize, curPage) {
+            ResWorkView(resource, pageSize, curPage,changeModel) {
                 this.$http({
                     url: 'ResWorkView',
                     data: {
                         "PageSize": pageSize ? pageSize : "20",
                         "CurPage": curPage ? curPage : "1",
                         "Resource": resource,
-                        'GroupName':this.CurImplementationResGroup
+                        'GroupName':this.CurImplementationResGroup,
+                        'ChangeModel':changeModel?changeModel:false,
                     }
                 }).then(res => {
                     this.tableCount = res.ImplementationCount;
@@ -160,13 +165,13 @@
             },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
             },
             handleSizeChange: function (size) {
                 //table的页数发生改变触发事件
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
             },
             getTableColumn() {
                 this.columnsData = [];
@@ -184,10 +189,17 @@
                 this.pagesize = 20;
                 this.currentPage = 1;
                 this.resource = '';
+                this.changeModelFlag = false;
                 this.ResWorkView(this.resource, this.pagesize, this.currentPage);
             },
             SerachRes() {
                 this.GetResView(this.Serachres);
+            },
+            ChangeModel(){
+                this.currentPage = 1;
+                this.pagesize = 20;
+                this.changeModelFlag = true;
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
             },
         }
     }

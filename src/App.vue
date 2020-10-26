@@ -55,7 +55,6 @@
                 <i class="el-icon-setting"></i>
                 <span slot="title">历史数据</span>
             </el-menu-item>
-
             <el-submenu index="4">
                 <template slot="title">
                     <i class="el-icon-location"></i>
@@ -123,7 +122,7 @@
                         res.groupList = JSON.parse(res.groupList);
                     }
                     this.ChangeImplementationResGroup(res.groupList);
-                    this.ChangeCurImplementationResGroup(res.groupList[0]['viewname']);
+                    // this.ChangeCurImplementationResGroup(res.groupList[0]['viewname']);
                 });
 
             }

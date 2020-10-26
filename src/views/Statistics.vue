@@ -12,11 +12,11 @@
                     <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate" />
                     <span v-else v-text="item.resstate" />
                 </div>
-
             </div>
         </div>
         <div class="main">
             <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname" />
+            <div class="ChartBox">功能即将上线......</div>
         </div>
     </div>
 </template>
@@ -54,6 +54,7 @@
                         'empid':cookie.get('empID')
                     }
                 }).then(res=>{
+
                     this.resStatus = [];
                     this.resStatus = res;
                     this.curRes = res[0];
@@ -66,7 +67,6 @@
         }
     }
 </script>
-
 <style lang="scss" scoped>
     .top {
         width: 100%;
@@ -116,8 +116,10 @@
             display: none; /* Chrome Safari */
         }
     }
-
     .main {
-        background-color: green;
+        .ChartBox{
+            width: 100%;
+            height: 380px;
+        }
     }
 </style>

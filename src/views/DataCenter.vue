@@ -304,7 +304,7 @@
                 padding: 8px;
                 background-color: red;
                 border-bottom: 1px solid rgba(0, 0, 0, .125);
-
+                cursor: pointer;
                 .card-header {
                     color: white;
                     font-size: 14px;
@@ -372,7 +372,6 @@
                 border: 1px solid #808080;
                 width: 300px;
                 border-radius: 4px;
-
                 p {
                     width: 100%;
                     padding: 4px;
