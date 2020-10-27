@@ -42,7 +42,6 @@ const http = options => {
             }
         }).catch(err => {
            window.location.replace(',');
-
             reject(err);
         })
     })

@@ -1,5 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-    <div class="home wrap" :class="{'WrapShow':WrapShow}" v-if="[v-cloak]">
+    <div class="home wrap" :class="{'WrapShow':!NavShow}" v-if="[v-cloak]">
         <div class="title" v-text="'当前计划发布日期：'+ReleaseTime+'，最后计划发布人：'+Owner+'，计划发布名称：'+WorkPlanName"/>
         <div class="flexBox">
             <div class="primaryBox" @click="changeWorkType('EarlyPlan','提前交货订单')">
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-
+    import {mapState} from 'vuex'
     export default {
         name: "Home",
         data() {
@@ -123,12 +123,7 @@
             }
         },
         computed: {
-            /**
-             * @return {boolean}
-             */
-            WrapShow() {
-                return !this.$store.state.NavShow;
-            }
+            ...mapState(['NavShow']),
         },
         mounted() {
             this.getPlanMessage();
@@ -160,13 +155,12 @@
                 });
             },
             getDataCenterData(pageSize, curPage, filter,) {
-
                 //获取表格的数据
                 this.tableData = [];
                 this.$http({
                     url: 'DataCenter',
                     data: {
-                        "PageSize": pageSize ? pageSize : "20",
+                        "PageSize": this.pagesize,
                         "CurPage": curPage ? curPage : "1",
                         "filter": filter ? JSON.stringify(filter) : null,
                         "fuzzyFilter": this.fuzzyFilter,
@@ -182,7 +176,6 @@
                     this.tableData.push(...res.data);
                     this.tableCount = res.total;
                 });
-
             },
             getTableColumn() {
                 //获取表格的列
@@ -197,7 +190,7 @@
                     this.columnsJson = res;
                     data.forEach(item => {
                         let itemData = item.split(':')[1];
-                        var reg = new RegExp('"', "g");
+                        let reg = new RegExp('"', "g");
                         itemData = itemData.replace(reg, '');
                         if (itemData.indexOf('}') !== -1) {
                             itemData = itemData.replace('}', '');

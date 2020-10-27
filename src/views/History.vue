@@ -1,6 +1,14 @@
 <template>
-	<div class="wrap" :class="{'WrapShow':WrapShow}">
-		<h1>用户的登陆记录</h1>
+	<div class="wrap" :class="{'WrapShow':!NavShow}">
+		<h1>手机报工操作记录</h1>
+		<p>
+			<span @click="TodayData">查询今天的数据</span>
+			<span @click="WeekData">查询最近七天</span>
+			<span @click="MonthData">查询最近一个月</span>
+			<span  @click="ThreeMonthData">查询最近三个月</span>
+			<span @click="HalfYearData">查询最近半年</span>
+			<span @click="AllData">全部数据</span>
+		</p>
 		<div id="table" style="margin-top: 15px;">
 			<el-table
 					:data="tableData"
@@ -39,6 +47,7 @@
 	</div>
 </template>
 <script>
+	import {mapState} from 'vuex'
 	export default {
 		data() {
 			return {
@@ -49,16 +58,12 @@
 				curPage: 1,
 				pagesize: 20,
 				tableData: [],
-				tableOffset:null
+				tableOffset:null,
+				filter:'',
 			}
 		},
 		computed: {
-			/**
-			 * @return {boolean}
-			 */
-			WrapShow() {
-				return !this.$store.state.NavShow;
-			}
+			...mapState(['NavShow']),
 		},
 		mounted() {
 			this.getTableCounmns();
@@ -71,23 +76,24 @@
 				this.$http({
 					url: "TableFiled",
 					data: {
-						"tableName": "History"
+						"tableName": "History",
+						"filter":this.filter
 					}
 				}).then(res => {
 					this.columnsData = [];
-
 					for(let item in res){
 						this.columnsData.push(res[item]);
 					}
 					this.getTableData();
 				});
 			},
-			getTableData(pageSize, curPage){
+			getTableData(){
 				this.$http({
 					url:'History',
 					data:{
-						"PageSize": pageSize ? pageSize : "20",
-						"CurPage": curPage ? curPage : "1"
+						"PageSize": this.pagesize,
+						"CurPage": this.currentPage,
+						"filter":this.filter,
 					}
 				}).then(res=>{
 					this.tableCount = res.data['total'];
@@ -108,7 +114,48 @@
 				this.currentPage = 1;
 				this.getTableData(this.pagesize, this.currentPage);
 			},
+			TodayData(){
+				this.filter = this.$Fun.getCusDateTime('today');
+				this.currentPage = 1;
+				this.getTableData();
+			},
+			ThreeMonthData(){
+				this.filter = this.$Fun.getCusDateTime('ThreeMonth');
+				this.currentPage = 1;
+				console.log(this.filter);
+				this.getTableData();
+			},
+			WeekData(){
+				this.filter = this.$Fun.getCusDateTime('week');
+				this.currentPage = 1;
+				this.getTableData();
+			},
+			MonthData(){
+				this.filter = this.$Fun.getCusDateTime('month');
+				this.currentPage = 1;
+
+				this.getTableData();
+			},
+			HalfYearData(){
+				this.filter = this.$Fun.getCusDateTime('HalfYear');
+				this.currentPage = 1;
+				console.log(this.filter);
+				this.getTableData();
+			},
+			AllData(){
+				this.filter = "";
+				this.currentPage = 1;
+				this.getTableData();
+			}
 		}
 	}
 </script>
-
+<style scoped lang="scss">
+	.wrap{
+		span{
+			margin: 0 4px;
+			color: #007bff;
+			cursor: pointer;
+		}
+	}
+</style>

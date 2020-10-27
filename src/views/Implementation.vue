@@ -1,5 +1,5 @@
 <template>
-    <div class="about wrap" :class="{'WrapShow':WrapShow}">
+    <div class="about wrap" :class="{'WrapShow':!NavShow}">
         <!--<h1>这个是关于页面</h1>-->
         <div class="resBox">
             <div class="resTitle">
@@ -19,12 +19,35 @@
             <i class="fa fa-table"></i>
             <span>当前计划详情</span>
             <p class="all" @click="allRes">所有设备</p>
-            <span v-if="resource" v-text="'&gt; '+resource" />
+            <span v-if="resource" v-text="'&gt; '+resource"/>
             <span v-text="'&gt; 换模计划'" v-if="changeModelFlag"></span>
             <span style="position: absolute;right: 15px;" @click="ChangeModel">换模计划</span>
         </div>
         <div id="table">
-            <!--<input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">-->
+            <button class="filterBtn" @click="filterShow">高级筛选</button>
+            <button class="exportBtn">导出数据</button>
+            <div class="filterBox" :class="{'show':filterBox}">
+                <p>* 请选择筛选条件 <i class="fa fa-times" aria-hidden="true" @click="closeFilter"></i></p>
+                <div class="conMain">
+                    <div class="con" v-for="(value,key) in columnsData" :key="key">
+                        <div class="cLeft" v-text="value+':'"/>
+                        <div class="cRight" v-if="key==='planStartTime'?true:false">
+                            <input type="text" :data="key">
+                        </div>
+                        <div class="cRight" v-else>
+                            <input type="text" :data="key">
+                        </div>
+                    </div>
+                </div>
+                <div class="filterBtnGroup">
+                    <div class="btnCon">
+                        <button class="reset" @click="filterReset" v-text="'重置'"/>
+                        <button class="confirm" @click="confirm" v-text="'搜索'"/>
+                    </div>
+                </div>
+
+            </div>
+            <input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">
             <el-table
                     :data="tableData"
                     border
@@ -62,7 +85,7 @@
     </div>
 </template>
 <script>
-    import {mapState} from 'vuex'
+    import {mapState, mapMutations} from 'vuex'
 
     export default {
         data() {
@@ -78,24 +101,23 @@
                 columnsData: {},
                 tableOffset: null,
                 Serachres: '',
-                changeModelFlag:false
+                changeModelFlag: false,
+                filterBox:false,
+                filterjs:{},
+                fuzzyFilter:''
             }
         },
         computed: {
-            ...mapState(['CurImplementationResGroup']),
-            /**
-             * @return {boolean}
-             */
-            WrapShow() {
-                return !this.$store.state.NavShow;
-            },
-
+            ...mapState(['CurImplementationResGroup','NavShow']),
         },
         watch: {
             CurImplementationResGroup() {
                 this.GetResView();
                 this.Serachres = '';
+                this.filterjs = null;
                 this.changeModelFlag = false;
+                this.fuzzyFilter = '';
+                this.filterReset();
             },
         },
         mounted() {
@@ -104,10 +126,16 @@
             this.tableOffset = wrapH - offsetTop - 32 - 60;
             this.GetResView();
             this.getTableColumn();
+            let name = this.$route.params.name;
+            this.ResWorkView(name);
         },
         methods: {
+            ...mapMutations(['ChangeCurImplementationResGroup']),
             GetResView(resName) {
                 this.currentPage = 1;
+                if (!this.CurImplementationResGroup) {
+                    this.ChangeCurImplementationResGroup(this.$route.params.name);
+                }
                 this.$http({
                     url: 'ResView',
                     data: {
@@ -117,7 +145,7 @@
                 }).then(res => {
                     if (res.resCount > 0) {
                         this.ImplementationResView = JSON.parse(res.resView);
-                        if (document.getElementsByClassName('active').length>0) {
+                        if (document.getElementsByClassName('active').length > 0) {
                             document.getElementsByClassName('active')[0].classList.remove('active');
                         }
                         this.resource = this.ImplementationResView[0].resName;
@@ -130,26 +158,31 @@
                 this.resBodyShow = this.resBodyShow ? false : true
             },
             resClick(e) {
-                if (document.getElementsByClassName('active').length>0) {
+                if (document.getElementsByClassName('active').length > 0) {
                     document.getElementsByClassName('active')[0].classList.remove('active');
                 }
                 e.target.setAttribute('class', 'active');
                 this.changeModelFlag = false;
                 let resource = e.target.innerText;
                 this.resource = resource;
+                this.filterjs = null;
+                this.fuzzyFilter = '';
+                this.filterReset();
                 this.ResWorkView(resource);
                 this.tableData = [];
                 this.currentPage = 1;
             },
-            ResWorkView(resource, pageSize, curPage,changeModel) {
+            ResWorkView(resource, pageSize, curPage, changeModel) {
                 this.$http({
                     url: 'ResWorkView',
                     data: {
                         "PageSize": pageSize ? pageSize : "20",
                         "CurPage": curPage ? curPage : "1",
                         "Resource": resource,
-                        'GroupName':this.CurImplementationResGroup,
-                        'ChangeModel':changeModel?changeModel:false,
+                        'GroupName': this.CurImplementationResGroup,
+                        'ChangeModel': changeModel ? changeModel : false,
+                        'filter':this.filterjs?JSON.stringify(this.filterjs):null,
+                        'fuzzyFilter':this.fuzzyFilter?this.fuzzyFilter:"",
                     }
                 }).then(res => {
                     this.tableCount = res.ImplementationCount;
@@ -165,13 +198,13 @@
             },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
             },
             handleSizeChange: function (size) {
                 //table的页数发生改变触发事件
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
             },
             getTableColumn() {
                 this.columnsData = [];
@@ -195,11 +228,49 @@
             SerachRes() {
                 this.GetResView(this.Serachres);
             },
-            ChangeModel(){
+            ChangeModel() {
                 this.currentPage = 1;
                 this.pagesize = 20;
                 this.changeModelFlag = true;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage,this.changeModelFlag);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
+            },
+            filterShow() {
+                //高级筛选的按钮的点击事件
+                this.filterBox = this.filterBox ? false : true;
+            },
+            closeFilter() {
+                //高级筛选框的关闭按钮
+                this.filterBox = false;
+            },
+            filterReset() {
+                //高级筛选的重置按钮
+                let cRight = document.querySelectorAll('.cRight');
+                cRight.forEach(item => {
+                    item.children[0].value = ''
+                });
+                this.filterjs = null;
+                this.ResWorkView(this.resource);
+                this.closeFilter();
+            },
+            confirm() {
+                //高级筛选的确定按钮
+                let cRight = document.querySelectorAll('.cRight');
+                this.filterjs = {};
+                cRight.forEach(item => {
+                    let inputVal = item.children[0].value.trim();
+                    let inputAttr = item.children[0].attributes['data'].value;
+                    if (inputVal != '') {
+                        this.filterjs [inputAttr] = inputVal;
+                    }
+                });
+                this.currentPage = 1;
+                this.ResWorkView(this.resource,this.pagesize, this.currentPage,this.changeModelFlag);
+                this.closeFilter();
+            },
+            fuzzyInp() {
+                //模糊筛选的input事件
+                this.currentPage = 1;
+                this.ResWorkView(this.resource,this.pagesize,this.currentPage,this.changeModelFlag);
             },
         }
     }
@@ -315,6 +386,147 @@
             .all {
                 color: limegreen;
                 cursor: pointer;
+            }
+        }
+        #table{
+            position: relative;
+            margin-top: 15px;
+            .filterBtn, .exportBtn {
+                padding: 6px;
+                font-size: 12px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-weight: 400;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                margin-bottom: 8px;
+                outline: none;
+            }
+            .fuzzyInp {
+                margin-left: 10px;
+                padding: 4px;
+                outline: none;
+            }
+            .exportBtn {
+                margin-right: 12px;
+                float: right;
+            }
+            .filterBox {
+                display: none;
+                position: absolute;
+                left: 0;
+                top: 30px;
+                z-index: 10000;
+                height: 260px;
+                background-color: white;
+                border: 1px solid #808080;
+                width: 300px;
+                border-radius: 4px;
+                p {
+                    width: 100%;
+                    padding: 4px;
+                    color: #17a2b8;
+                    border-bottom: 1px solid #808080;
+                    font-size: 14px;
+                    -webkit-box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+
+                    i {
+                        float: right;
+                    }
+                }
+
+                .conMain {
+                    height: 190px;
+                    overflow-x: hidden;
+                    overflow-y: scroll;
+
+                    .con {
+                        width: 100%;
+                        margin: 4px 0;
+
+                        .cLeft {
+                            width: 40%;
+                            float: left;
+                            padding: 4px;
+                            font-size: 12px;
+                            white-space: nowrap;
+                            box-sizing: border-box;
+                        }
+
+                        .cRight {
+                            float: right;
+                            width: 60%;
+                            box-sizing: border-box;
+                            padding: 0 4px;
+
+                            input {
+                                border: 1px solid #ced4da;
+                                border-radius: 4px;
+                                box-sizing: border-box;
+                                width: 100%;
+                                padding: 4px;
+                            }
+                        }
+                    }
+
+                    .con:after {
+                        display: block;
+                        content: '';
+                        clear: both;
+                    }
+                }
+
+                .conMain::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .filterBtnGroup {
+                    background-color: white;
+                    position: absolute;
+                    bottom: 0;
+                    border-top: 1px solid #808080;
+                    width: 100%;
+                    padding: 4px 0;
+
+                    .btnCon {
+                        display: block;
+                        width: 50%;
+                        margin: 0 auto;
+
+                        .reset {
+                            color: #fff;
+                            background-color: #dc3545;
+                            border-color: #dc3545;
+                            outline: none;
+                            border: none;
+                            font-size: 12px;
+                            width: 50px;
+                            padding: 4px 0;
+                        }
+
+                        .confirm {
+                            color: #fff;
+                            background-color: #28a745;
+                            border-color: #28a745;
+                            outline: none;
+                            border: none;
+                            font-size: 12px;
+                            width: 50px;
+                            padding: 4px 0;
+                            float: right;
+                        }
+                    }
+
+                }
+            }
+
+            .show {
+                display: block;
             }
         }
     }

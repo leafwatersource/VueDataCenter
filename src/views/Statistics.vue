@@ -1,5 +1,5 @@
 <template>
-    <div class="wrap" :class="{'WrapShow':WrapShow}" v-if="[v-cloak]">
+    <div class="wrap" :class="{'WrapShow':!NavShow}" v-if="[v-cloak]">
 
         <div class="inputBox">请输入设备名称 <input type="text" placeholder="请输入设备名称"></div>
         <div class="top">
@@ -7,10 +7,12 @@
                 <div class="res" v-for="item in resStatus" :key="item.resname"
                      @click="resClick(item)"
                      :data="item"
+                     :title="item.description"
                      :class="{'resK':item.resType=='0'?true:false,'Error':item.resType=='3'?true:false}">
                     <span v-text="'设备名称:'+item.resname" />
                     <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate" />
                     <span v-else v-text="item.resstate" />
+                    <span v-if="item.description" v-text="'描述:'+item.description" />
                 </div>
             </div>
         </div>
@@ -33,16 +35,12 @@
             }
         },
         computed: {
-            /**
-             * @return {boolean}
-             */
-            ...mapState(['UserMessage']),
-            WrapShow() {
-                return !this.$store.state.NavShow;
-            }
+            ...mapState(['UserMessage','NavShow']),
         },
+
         mounted() {
             this.GetResStatus();
+
         },
         methods: {
             GetResStatus(){
@@ -94,11 +92,17 @@
                 border-radius: 4px;
                 box-shadow: 1px 1px 5px #cccccc;
                 cursor: pointer;
+                width: 300px;
                 span {
                     font-size: 12px;
                     color: white;
                     font-weight: 600;
+                    width: 100%;
+                    white-space: nowrap;/*强制在一行显示*/
+                    text-overflow:ellipsis;/*设置超出内容显示...*/
+                    overflow: hidden;/*一定不能少 超出的内容进行隐藏*/
                 }
+
             }
             .Error {
                 background-color: #cd2626;

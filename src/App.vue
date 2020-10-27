@@ -53,11 +53,11 @@
             </el-submenu>
             <el-menu-item index="/history">
                 <i class="el-icon-setting"></i>
-                <span slot="title">历史数据</span>
+                <span slot="title">事件记录</span>
             </el-menu-item>
             <el-submenu index="4">
                 <template slot="title">
-                    <i class="el-icon-location"></i>
+                    <i class="fa fa-bar-chart MyIcon" />
                     <span>统计中心</span>
                 </template>
                 <el-menu-item-group>
@@ -98,9 +98,6 @@
         },
         watch: {
             $route(to) {
-                // if (to.path.indexOf('/DataCenter') != -1 || to.path.indexOf('/history') != -1) {
-                //     this.GetImplementationData();
-                // }
                 if (to.path!='#/Select'&&to.path!='#/'&&to.path!='/') {
                     this.GetImplementationData();
                 }
@@ -122,7 +119,6 @@
                         res.groupList = JSON.parse(res.groupList);
                     }
                     this.ChangeImplementationResGroup(res.groupList);
-                    // this.ChangeCurImplementationResGroup(res.groupList[0]['viewname']);
                 });
 
             }
@@ -264,6 +260,10 @@
                     width: 70%;
                     margin: 20px auto;
                     box-sizing: border-box;
+                }
+                .MyIcon{
+                    margin: 0 6px;
+                    margin-right: 8px;
                 }
             }
             #nav::-webkit-scrollbar{
