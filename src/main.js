@@ -11,7 +11,6 @@ import Fun from './util/publicFun'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import echarts from 'echarts'
-
 Vue.prototype.$http=http;
 Vue.prototype.$Fun = Fun;
 Vue.prototype.$echarts = echarts;

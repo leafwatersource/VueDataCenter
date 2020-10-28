@@ -2,11 +2,9 @@
 import axios from 'axios'
 import qs from 'qs'
 import cookie from 'vue-cookie'
-
-
 // var api = 'http://pmser.szratetec.com:8088/';
 // var api = 'https://localhost:44309/';
-var api = 'http://tenglongapi.szratetec.cn/';
+var api = 'http://woodfastapi.szratetec.cn/';
 const http = options => {
     return new Promise((resolve, reject) => {
         const defaultOptions = {};
@@ -46,5 +44,4 @@ const http = options => {
         })
     })
 };
-
-export default http
+export default http;

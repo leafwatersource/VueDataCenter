@@ -9,15 +9,15 @@
                      :data="item"
                      :title="item.description"
                      :class="{'resK':item.resType=='0'?true:false,'Error':item.resType=='3'?true:false}">
-                    <span v-text="'设备名称:'+item.resname" />
-                    <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate" />
-                    <span v-else v-text="item.resstate" />
-                    <span v-if="item.description" v-text="'描述:'+item.description" />
+                    <span v-text="'设备名称:'+item.resname"/>
+                    <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate"/>
+                    <span v-else v-text="item.resstate"/>
+                    <span v-if="item.description" v-text="'描述:'+item.description"/>
                 </div>
             </div>
         </div>
         <div class="main">
-            <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname" />
+            <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname"/>
             <div class="ChartBox">功能即将上线......</div>
         </div>
     </div>
@@ -26,42 +26,41 @@
 <script>
     import {mapState} from 'vuex'
     import cookie from 'vue-cookie'
+
     export default {
         name: "Statistics",
         data() {
             return {
-                resStatus:[],
-                curRes:''
+                resStatus: [],
+                curRes: ''
             }
         },
         computed: {
-            ...mapState(['UserMessage','NavShow']),
+            ...mapState(['UserMessage', 'NavShow']),
         },
 
         mounted() {
             this.GetResStatus();
-
         },
         methods: {
-            GetResStatus(){
+            GetResStatus() {
                 //获取设备状态
                 console.log(this.UserMessage);
                 this.$http({
-                    url:"GetResStatus",
-                    data:{
-                        'empid':cookie.get('empID')
+                    url: "GetResStatus",
+                    data: {
+                        'empid': cookie.get('empID')
                     }
-                }).then(res=>{
-
+                }).then(res => {
                     this.resStatus = [];
                     this.resStatus = res;
                     this.curRes = res[0];
                 })
             },
-            resClick(item){
+            resClick(item) {
                 //设备的点击事件
                 this.curRes = item;
-            }
+            },
         }
     }
 </script>
@@ -71,6 +70,7 @@
         height: 400px;
         overflow-y: hidden;
         padding: 10px 0;
+
         .topCon {
             width: 100%;
             height: 100%;
@@ -78,7 +78,7 @@
             display: flex;
             flex-wrap: wrap;
             flex-direction: row;
-           align-content: flex-start;
+            align-content: flex-start;
             scrollbar-width: none; /* Firefox */
             .res {
                 height: 50px;
@@ -93,23 +93,27 @@
                 box-shadow: 1px 1px 5px #cccccc;
                 cursor: pointer;
                 width: 300px;
+
                 span {
                     font-size: 12px;
                     color: white;
                     font-weight: 600;
                     width: 100%;
-                    white-space: nowrap;/*强制在一行显示*/
-                    text-overflow:ellipsis;/*设置超出内容显示...*/
-                    overflow: hidden;/*一定不能少 超出的内容进行隐藏*/
+                    white-space: nowrap; /*强制在一行显示*/
+                    text-overflow: ellipsis; /*设置超出内容显示...*/
+                    overflow: hidden; /*一定不能少 超出的内容进行隐藏*/
                 }
 
             }
+
             .Error {
                 background-color: #cd2626;
             }
-            .resK{
+
+            .resK {
                 background-color: #bababa;
             }
+
             .res:hover {
                 background-color: #343a40;
                 color: white;
@@ -120,10 +124,17 @@
             display: none; /* Chrome Safari */
         }
     }
+
     .main {
-        .ChartBox{
+        .ChartBox {
             width: 100%;
             height: 380px;
         }
     }
 </style>
+
+
+
+
+
+

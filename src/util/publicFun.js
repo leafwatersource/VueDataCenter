@@ -21,26 +21,29 @@ var Fun = {
             return year + '-' + month + '-' + date + ' ' + hour + ':' + min;
         }
     },
-    getCusDateTime(type){
+    getCusDateTime(type) {
         let datetime = new Date();
         let year = datetime.getFullYear();
-        let  month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
+        let month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
         let date = datetime.getDate();
-        if (type==='week') {
-            datetime.setDate(datetime.getDate()-7);
+        if (type === 'week') {
+            //获取七天的日期
+            datetime.setDate(datetime.getDate() - 7);
             date = datetime.getDate();
-        }else if (type==='month') {
-            datetime.setMonth(datetime.getMonth()-1);
-            month=datetime.getMonth()+1;
-        }else if (type==="ThreeMonth") {
-            datetime.setMonth(datetime.getMonth()-2);
-            month=datetime.getMonth()+1;
-        }else if(type === "HalfYear"){
-            datetime.setMonth(datetime.getMonth()-5);
-            month=datetime.getMonth()+1;
+        } else if (type === 'month') {
+            //获取前一个月的日期
+            datetime.setMonth(datetime.getMonth() - 1);
+            month = datetime.getMonth() + 1;
+        } else if (type === "ThreeMonth") {
+            //获取前三个月的日期
+            datetime.setMonth(datetime.getMonth() - 2);
+            month = datetime.getMonth() + 1;
+        } else if (type === "HalfYear") {
+            //获取前六个月的日期
+            datetime.setMonth(datetime.getMonth() - 5);
+            month = datetime.getMonth() + 1;
         }
         return year + '-' + month + '-' + date + ' 00:00';
     },
 };
-
 export default Fun;
