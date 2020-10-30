@@ -8,6 +8,7 @@ import Select from '../views/Select.vue'
 import NotFound from '../views/NotFound.vue'
 import Error from '../views/Error'
 import Statistics from '../views/Statistics'
+import ResStatistics from '../views/ResStatistics'
 Vue.use(VueRouter);
 
 const routes = [{
@@ -55,6 +56,14 @@ const routes = [{
         component:Statistics,
         meta:{
             title:'统计中心'
+        }
+    },
+    {
+        path:'/ResStatistics',
+        name:'ResStatistics',
+        component:ResStatistics,
+        meta:{
+            title:'设备统计'
         }
     },
     {

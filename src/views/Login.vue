@@ -60,7 +60,6 @@
                             "pwd": this.UserPass
                         }
                     }).then(res => {
-                        console.log(res);
                         if (res.loginState !== "0") {
                             if(res.loginState=="1"){
                                 this.$router.push("/Select");

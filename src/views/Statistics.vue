@@ -8,11 +8,11 @@
                      @click="resClick(item)"
                      :data="item"
                      :title="item.description"
-                     :class="{'resK':item.resType=='0'?true:false,'Error':item.resType=='3'?true:false}">
-                    <span v-text="'设备名称:'+item.resname"/>
-                    <span v-if="item.resorderstate" v-text="item.resstate+':'+item.resorderstate"/>
-                    <span v-else v-text="item.resstate"/>
-                    <span v-if="item.description" v-text="'描述:'+item.description"/>
+                     :class="{'resK':item.resstate=='2'?true:false,'Error':item.resstate=='3'?true:false}">
+                    <span  v-text="'设备名称:'+item.resname"/>
+                    <span v-if="item.resorderbean" v-text="item.resComment+':'+item.resorderbean.workID"/>
+                    <span v-else v-text="item.resComment"/>
+                    <span v-if="item.resorderbean" v-text="'描述:'+item.resorderbean.itemDesp"/>
                 </div>
             </div>
         </div>
@@ -45,7 +45,6 @@
         methods: {
             GetResStatus() {
                 //获取设备状态
-                console.log(this.UserMessage);
                 this.$http({
                     url: "GetResStatus",
                     data: {
