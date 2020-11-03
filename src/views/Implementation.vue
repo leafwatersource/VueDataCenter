@@ -29,13 +29,10 @@
             <div class="filterBox" :class="{'show':filterBox}">
                 <p>* 请选择筛选条件 <i class="fa fa-times" aria-hidden="true" @click="closeFilter"></i></p>
                 <div class="conMain">
-                    <div class="con" v-for="(value,key) in columnsData" :key="key">
-                        <div class="cLeft" v-text="value+':'"/>
-                        <div class="cRight" v-if="key==='planStartTime'?true:false">
-                            <input type="text" :data="key">
-                        </div>
-                        <div class="cRight" v-else>
-                            <input type="text" :data="key">
+                    <div class="con" v-for="item in columnsData" :key="item.key">
+                        <div class="cLeft" v-text="item.value+':'"/>
+                        <div class="cRight">
+                            <input type="text" :data="item.key">
                         </div>
                     </div>
                 </div>
@@ -61,9 +58,9 @@
             >
                 <template v-for="item in columnsData">
                     <el-table-column
-                            :key="item"
-                            :prop="item"
-                            :label="item"
+                            :key="item.key"
+                            :prop="item.value"
+                            :label="item.value"
                             sortable
                             show-overflow-tooltip
                             :min-width="120"
@@ -187,12 +184,12 @@
                 }).then(res => {
                     this.tableCount = res.ImplementationCount;
                     res.ImplementationData = JSON.parse(res.ImplementationData);
-                    res.ImplementationData.forEach(item => {
-                        item['需求日期'] = this.$Fun.foramateDate(item['需求日期']);
-                        item['计划开始'] = this.$Fun.formateTime(item['计划开始']);
-                        item['计划结束'] = this.$Fun.formateTime(item['计划结束']);
-                        item['切换开始'] = this.$Fun.formateTime(item['切换开始']);
-                    });
+                    // res.ImplementationData.forEach(item => {
+                    //     item['需求日期'] = this.$Fun.foramateDate(item['需求日期']);
+                    //     item['计划开始'] = this.$Fun.formateTime(item['计划开始']);
+                    //     item['计划结束'] = this.$Fun.formateTime(item['计划结束']);
+                    //     item['切换开始'] = this.$Fun.formateTime(item['切换开始']);
+                    // });
                     this.tableData = res.ImplementationData;
                 });
             },
@@ -215,7 +212,16 @@
                         "tableName": "WorkPlan"
                     }
                 }).then(res => {
-                    this.columnsData = res;
+                    res.forEach(item=>{
+                        let obj = {};
+                        for (let prop in item){
+                            if(prop!=="type"){
+                                obj['key'] = prop;
+                                obj['value'] = item[prop];
+                            }
+                        }
+                        this.columnsData.push(obj);
+                    });
                 })
             },
             allRes() {

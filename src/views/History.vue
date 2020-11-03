@@ -23,9 +23,9 @@
             >
                 <template v-for="item in columnsData">
                     <el-table-column
-                            :key="item"
-                            :prop="item"
-                            :label="item"
+                            :key="item.key"
+                            :prop="item.value"
+                            :label="item.value"
                             sortable
                             show-overflow-tooltip
                             :min-width="120"
@@ -82,9 +82,16 @@
                     }
                 }).then(res => {
                     this.columnsData = [];
-                    for (let item in res) {
-                        this.columnsData.push(res[item]);
-                    }
+                    res.forEach(item=>{
+                       for(let prop in item){
+                           if(prop !== 'type'){
+                               let obj = {};
+                               obj['key'] = prop;
+                               obj['value'] = item[prop];
+                               this.columnsData.push(obj);
+                           }
+                       }
+                    });
                     this.getTableData();
                 });
             },
@@ -100,10 +107,7 @@
                     this.tableCount = res.data['total'];
                     this.tableData = [];
                     res.data['rows'] = JSON.parse(res.data['rows']);
-                    for (let i = 0; i < res.data['rows'].length; i++) {
-                        res.data['rows'][i]['事件时间'] = this.$Fun.formateTime(res.data['rows'][i]['事件时间']);
-                        this.tableData.push(res.data['rows'][i]);
-                    }
+                    this.tableData = res.data['rows'];
                 })
             },
             handleCurrentChange: function (currentPage) {
@@ -131,6 +135,7 @@
             },
             WeekData(e) {
                 this.filter = this.$Fun.getCusDateTime('week');
+                console.log(this.filter);
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
                 e.target.classList.add('active');

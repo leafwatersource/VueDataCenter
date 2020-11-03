@@ -23,13 +23,13 @@
             <div class="filterBox" :class="{'show':filterBox}">
                 <p>* 请选择筛选条件 <i class="fa fa-times" aria-hidden="true" @click="closeFilter"></i></p>
                 <div class="conMain">
-                    <div class="con" v-for="(value,key) in columnsJson" :key="key">
-                        <div class="cLeft" v-text="value+':'"/>
-                        <div class="cRight" v-if="key==='planStartTime'?true:false">
-                            <input type="text" :data="key">
-                        </div>
-                        <div class="cRight" v-else>
-                            <input type="text" :data="key">
+                    <div class="con" v-for="item in columnsJson" :key="item.key">
+                        <div class="cLeft" v-text="item.value+':'"/>
+                        <!--<div class="cRight" v-if="key==='planStartTime'?true:false">-->
+                            <!--<input type="text" :data="item.value">-->
+                        <!--</div>-->
+                        <div class="cRight">
+                            <input type="text" :data="item.key">
                         </div>
                     </div>
                 </div>
@@ -168,11 +168,6 @@
                     },
                 }).then(res => {
                     res.data = JSON.parse(res.data);
-                    for (let i = 0; i < res.data.length; i++) {
-                        res.data[i]['需求日期'] = this.$Fun.foramateDate(res.data[i]['需求日期']);
-                        res.data[i]['计划开始时间'] = this.$Fun.formateTime(res.data[i]['计划开始时间']);
-                        res.data[i]['计划结束时间'] = this.$Fun.formateTime(res.data[i]['计划结束时间']);
-                    }
                     this.tableData.push(...res.data);
                     this.tableCount = res.total;
                 });
@@ -185,17 +180,18 @@
                         "tableName": "WorkOrder"
                     }
                 }).then(res => {
-                    let data = JSON.stringify(res).split(',');
                     this.columnsData = [];
-                    this.columnsJson = res;
-                    data.forEach(item => {
-                        let itemData = item.split(':')[1];
-                        let reg = new RegExp('"', "g");
-                        itemData = itemData.replace(reg, '');
-                        if (itemData.indexOf('}') !== -1) {
-                            itemData = itemData.replace('}', '');
+                    this.columnsJson = [];
+                    res.forEach(item=>{
+                        for(let props in item){
+                            if(props!='type'){
+                                this.columnsData.push(item[props]);
+                                let arr = {};
+                                arr['key'] = props;
+                                arr['value'] = item[props];
+                                this.columnsJson.push(arr);
+                            }
                         }
-                        this.columnsData.push(itemData);
                     });
                     this.getDataCenterData();
                 })

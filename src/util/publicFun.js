@@ -22,14 +22,19 @@ var Fun = {
         }
     },
     getCusDateTime(type) {
-        let datetime = new Date();
-        let year = datetime.getFullYear();
-        let month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
-        let date = datetime.getDate();
+        var datetime = new Date();
+
+        var year = datetime.getFullYear();
+        var month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
+        var date = datetime.getDate();
         if (type === 'week') {
             //获取七天的日期
+            if(date<8){
+                datetime.setMonth(month-1);
+            }
             datetime.setDate(datetime.getDate() - 7);
             date = datetime.getDate();
+            month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
         } else if (type === 'month') {
             //获取前一个月的日期
             datetime.setMonth(datetime.getMonth() - 1);
@@ -40,7 +45,7 @@ var Fun = {
             month = datetime.getMonth() + 1;
         } else if (type === "HalfYear") {
             //获取前六个月的日期
-            datetime.setMonth(datetime.getMonth() - 5);
+            datetime.setMonth(datetime.getMonth() - 6);
             month = datetime.getMonth() + 1;
         }
         return year + '-' + month + '-' + date + ' 00:00';

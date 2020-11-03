@@ -11,14 +11,14 @@
                      :class="{'resK':item.resstate=='2'?true:false,'Error':item.resstate=='3'?true:false}">
                     <span  v-text="'设备名称:'+item.resname"/>
                     <span v-if="item.resorderbean" v-text="item.resComment+':'+item.resorderbean.workID"/>
-                    <span v-else v-text="item.resComment"/>
+                    <span text="item.resComment"/>
                     <span v-if="item.resorderbean" v-text="'描述:'+item.resorderbean.itemDesp"/>
                 </div>
             </div>
         </div>
         <div class="main">
             <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname"/>
-            <div class="ChartBox">功能即将上线......</div>
+            <div class="ChartBox">功能即将上线Loading...</div>
         </div>
     </div>
 </template>
@@ -26,7 +26,6 @@
 <script>
     import {mapState} from 'vuex'
     import cookie from 'vue-cookie'
-
     export default {
         name: "Statistics",
         data() {
@@ -66,19 +65,20 @@
 <style lang="scss" scoped>
     .top {
         width: 100%;
-        height: 400px;
-        overflow-y: hidden;
+        min-height: 0px;
+        max-height: 400px;
         padding: 10px 0;
+        overflow-y: scroll;
+        scrollbar-width: none; /* Firefox */
 
         .topCon {
             width: 100%;
             height: 100%;
-            overflow-y: scroll;
             display: flex;
             flex-wrap: wrap;
             flex-direction: row;
             align-content: flex-start;
-            scrollbar-width: none; /* Firefox */
+
             .res {
                 height: 50px;
                 background-color: #018578;
@@ -91,8 +91,7 @@
                 border-radius: 4px;
                 box-shadow: 1px 1px 5px #cccccc;
                 cursor: pointer;
-                width: 300px;
-
+                width: 296px;
                 span {
                     font-size: 12px;
                     color: white;
@@ -104,7 +103,6 @@
                 }
 
             }
-
             .Error {
                 background-color: #cd2626;
             }
@@ -119,11 +117,11 @@
             }
         }
 
-        .topCon::-webkit-scrollbar {
-            display: none; /* Chrome Safari */
-        }
-    }
 
+    }
+    .top::-webkit-scrollbar {
+        display: none; /* Chrome Safari */
+    }
     .main {
         .ChartBox {
             width: 100%;
@@ -131,7 +129,6 @@
         }
     }
 </style>
-
 
 
 

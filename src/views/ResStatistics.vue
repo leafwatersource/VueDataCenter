@@ -369,7 +369,6 @@
                     position: relative;
                     display: flex;
                     flex-wrap: wrap;
-                    /*max-height: 300px;*/
                     min-height: 0px;
                     max-height: 300px;
                     align-content: flex-start;
