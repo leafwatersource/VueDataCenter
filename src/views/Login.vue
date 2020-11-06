@@ -12,12 +12,12 @@
                     <p class="title" v-text="'用户登陆'"/>
                     <input type="text" placeholder="用户名" v-model="EmpID"/>
                     <form>
-                    <input type="password" placeholder="密码" v-model="UserPass"/>
+                        <input type="password" placeholder="密码" v-model="UserPass"/>
                     </form>
                     <button @click="LoginClick" v-text="'登陆'" v-if="LoginState"/>
                     <div class="fouceOut" v-else>
                         <button v-text="'强制登录'" @click="LogOut"/>
-                        <button v-text="'取消'" class="cancel" @click="cancel" />
+                        <button v-text="'取消'" class="cancel" @click="cancel"/>
                     </div>
                     <div class="errorBox" v-text="ErrorMessage"/>
                 </div>
@@ -26,7 +26,6 @@
     </div>
 </template>
 <script>
-
     export default {
         data() {
             return {
@@ -37,48 +36,86 @@
             };
         },
         mounted() {
-
+            this.Test()
         },
         methods: {
-            LoginClick() {
-                // 登录按钮的点击事件
-                if (this.EmpID == "") {
-                    // 判断用户名是否为空
-                    this.ErrorMessage = "请输入用户名";
-                    return;
-                }
-                if (this.UserPass == "") {
-                    // 判断密码是否为空
-                    this.ErrorMessage = "请输入密码";
-                    return;
-                } else {
-                    this.$http({
-                        //这里是你自己的请求方式、url和data参数
-                        url: 'login',
-                        data: {
-                            "empID": this.EmpID,
-                            "pwd": this.UserPass
-                        }
-                    }).then(res => {
-                        if (res.loginState !== "0") {
-                            if(res.loginState=="1"){
-                                this.$router.push("/Select");
-                                return;
-                            }else {
-                                this.LoginState = false;
+            Test(x = 10, y = 20) {
+                console.log(x, y);
+            },
+            hasLogin() {
+                return new Promise( (resolve, reject)=> {
+                    if (this.EmpID == "") {
+                        // 判断用户名是否为空
+                        this.ErrorMessage = "请输入用户名";
+                        reject('请输入用户名');
+                        return;
+                    }
+                    if (this.UserPass == "") {
+                        // 判断密码是否为空
+                        this.ErrorMessage = "请输入密码";
+                        reject('请输入密码');
+                        return;
+                    }
+                    var token = this.$cookie.get('token');
+                    if (typeof token === "string") {
+                        this.$http({
+                            url: "HasLogin",
+                            data: {
+                                "empid": this.EmpID,
+                                "userGuid": token
                             }
-                        }
-                        this.ErrorMessage = res.message;
-                    }, err => {
-                        console.log(err);
-                        this.ErrorMessage = "服务器繁忙,请稍后重试";
-                    });
-                    //登录查询
-                    // 设置cookie默认过期时间单位是1d(1天)
-
-                    // 跳转到选择页面
-                    // this.$router.push("/Select");
-                }
+                        }).then(result => {
+                            console.log(result);
+                            resolve(result.LoginStatus)
+                            //用户上次登录了,没用用户强制登录
+                            // if (result.LoginStatus === 1) {
+                            //     resolve(1);
+                            // } else {
+                            //     //上次用户登录了然后被第二个用户强制登录了
+                            //     resolve(0);
+                            // }
+                        })
+                    }else{
+                        //用户没有登陆过,或者用户清除了缓存
+                        resolve(0);
+                    }
+                });
+                // 登录按钮的点击事件
+            },
+            LoginClick() {
+                this.hasLogin().then(res => {
+                    if(res===0){
+                        this.$http({
+                            //这里是你自己的请求方式、url和data参数
+                            url: 'login',
+                            data: {
+                                "empID": this.EmpID,
+                                "pwd": this.UserPass
+                            }
+                        }).then(res => {
+                            console.log(res);
+                            if (res.loginState !== "0") {
+                                if (res.loginState == "1") {
+                                    this.$router.push("/Select");
+                                    return;
+                                } else {
+                                    this.LoginState = false;
+                                }
+                            }
+                            this.ErrorMessage = res.message;
+                        }, err => {
+                            console.log(err);
+                            this.ErrorMessage = "服务器繁忙,请稍后重试";
+                        });
+                    }else{
+                        // 登录成功
+                        this.LogOut();
+                    }
+                });
+                //登录查询
+                // 设置cookie默认过期时间单位是1d(1天)
+                // 跳转到选择页面
+                // this.$router.push("/Select");
             },
             LogOut() {
                 this.$http({
@@ -105,17 +142,17 @@
             GetUserMessage() {
                 this.$http({url: 'UserMessage'}).then(res => {
                     this.$store.state.UserMessage = res[0];
-                    this.$cookie.set("empName",res[0].empName,1);
-                    this.$cookie.set("sysID",res[0].sysID,1);
+                    this.$cookie.set("empName", res[0].empName, 1);
+                    this.$cookie.set("sysID", res[0].sysID, 1);
                     this.$router.push("/Select");
                 })
             },
-            cancel(){
+            cancel() {
                 this.LoginState = true;
                 this.ErrorMessage = '';
                 this.EmpID = '';
                 this.UserPass = '';
-            }
+            },
         },
     };
 </script>

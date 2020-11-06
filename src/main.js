@@ -14,6 +14,7 @@ import echarts from 'echarts'
 Vue.prototype.$http=http;
 Vue.prototype.$Fun = Fun;
 Vue.prototype.$echarts = echarts;
+Vue.prototype.$cookie = cookie;
 Vue.use(VXETable);
 Vue.use(ElementUI);
 Vue.prototype.$cookie = cookie; //配置时候prototype.$这里的名字自己定义不是固定是cookie
