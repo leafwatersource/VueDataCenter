@@ -25,7 +25,6 @@
 
 <script>
     import {mapState} from 'vuex'
-    import cookie from 'vue-cookie'
     export default {
         name: "Statistics",
         data() {
@@ -39,20 +38,29 @@
         },
 
         mounted() {
-            this.GetResStatus();
+           this.renderPage();
         },
         methods: {
-            GetResStatus() {
-                //获取设备状态
-                this.$http({
-                    url: "GetResStatus",
-                    data: {
-                        'empid': cookie.get('empID')
-                    }
-                }).then(res => {
+            renderPage(){
+                this.GetResStatusPromise().then(res=>{
                     this.resStatus = [];
                     this.resStatus = res;
                     this.curRes = res[0];
+                });
+            },
+            GetResStatusPromise(){
+                //获取设备状态
+                return new Promise(resolve => {
+                    this.$http({
+                        url: "GetResStatus",
+                        data: {
+                            'empid':this.$cookie.get('empID')
+                        }
+                    }).then(res => {
+                        resolve(res);
+                        console.log(res);
+
+                    })
                 })
             },
             resClick(item) {

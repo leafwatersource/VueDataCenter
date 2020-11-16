@@ -84,6 +84,7 @@
         },
         methods: {
             GetResGroup() {
+                //获取设备组
                 this.$http({
                     url: 'GetResGroup'
                 }).then(res => {
@@ -98,6 +99,7 @@
                 })
             },
             GetResList(resGroup) {
+                //获取设备组下所有的设备
                 this.$http({
                     url: 'GetResList',
                     data: {
@@ -121,6 +123,9 @@
                 })
             },
             initChart(resName) {
+                console.log(this.resStatisticsData);
+                console.log(this.echartsxAxis);
+                //初始化echart统计图
                 var myChart = echarts.init(document.getElementById('chart'));
                 var option = {
                     title: {
@@ -165,6 +170,7 @@
                 }
             },
             resGroupClick(resGroupItem) {
+                //设备组的点击事件
                 this.curResGroup = resGroupItem;
                 //设备的统计信息
                 this.GetResList(resGroupItem);
@@ -175,9 +181,9 @@
                     data: {
                         "resName": resGroupItem.ViewName,
                         "timeType": 'W'
-
                     }
                 }).then(res => {
+                    console.log(res);
                     res.resData = JSON.parse(res.resData);
                     if (res.resData.length > 0) {
                         this.echartsxAxis = [];
@@ -250,12 +256,13 @@
                         });
                     }
                     if (this.resStatisticsData.length > 0) {
-                        this.initChart(resGroupItem.ViewName);
+                        this.initChart(resGroupItem['ViewName']);
                     }
 
                 })
             },
             GetResGroupTable() {
+                //获取设备列表点击后的事件记录
                 this.$http({
                     url: 'GetResGroupTable',
                     data: {
@@ -330,8 +337,10 @@
                         "resName": this.CurResName
                     }
                 }).then(res => {
+                    console.log(res)
+                    res.resData = JSON.parse(res.resData);
                     this.resListData = [];
-                    if (res.resData) {
+                    if (res.resData.length>0) {
                         res.resData = JSON.parse(res.resData);
                         res.resData.forEach(item => {
                             item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);

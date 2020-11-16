@@ -2,10 +2,10 @@
 import axios from 'axios'
 import qs from 'qs'
 import cookie from 'vue-cookie'
-// var api = 'http://pmser.szratetec.com:8088/';
 // var api = 'https://localhost:44309/';
-// var api = 'http://tenglongapi.szratetec.cn/';
-var api = 'http://woodfastapi.szratetec.cn/';
+var api = 'http://tenglongapi.szratetec.cn/';
+// var api = 'http://woodfastapi.szratetec.cn/';
+// var api = 'http://beiteapi.szratetec.cn/';
 const http = options => {
     return new Promise((resolve, reject) => {
         const defaultOptions = {};
@@ -30,7 +30,7 @@ const http = options => {
             headers: newOptions.headers
         }).then(res => {
             if (res.status == 200) {
-                //这里我们只需要获取返回的data中的数据即可
+                //这里需要获取返回的data中的数据即可
                 if (res.data === 301){
                     window.location.replace('/');
                 } else{

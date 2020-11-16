@@ -36,12 +36,8 @@
             };
         },
         mounted() {
-            this.Test()
         },
         methods: {
-            Test(x = 10, y = 20) {
-                console.log(x, y);
-            },
             hasLogin() {
                 return new Promise( (resolve, reject)=> {
                     if (this.EmpID == "") {
@@ -56,8 +52,9 @@
                         reject('请输入密码');
                         return;
                     }
-                    var token = this.$cookie.get('token');
-                    if (typeof token === "string") {
+                    let token = this.$cookie.get('token');
+                    let empid = this.$cookie.get('empID');
+                    if (typeof token === "string" && empid&&empid==this.EmpID) {
                         this.$http({
                             url: "HasLogin",
                             data: {
@@ -65,15 +62,7 @@
                                 "userGuid": token
                             }
                         }).then(result => {
-                            console.log(result);
                             resolve(result.LoginStatus)
-                            //用户上次登录了,没用用户强制登录
-                            // if (result.LoginStatus === 1) {
-                            //     resolve(1);
-                            // } else {
-                            //     //上次用户登录了然后被第二个用户强制登录了
-                            //     resolve(0);
-                            // }
                         })
                     }else{
                         //用户没有登陆过,或者用户清除了缓存

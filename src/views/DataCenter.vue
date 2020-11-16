@@ -126,63 +126,80 @@
             ...mapState(['NavShow']),
         },
         mounted() {
-            this.getPlanMessage();
+            this.renderPage();
             //计算表格的高度
             let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
             let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
             this.tableOffset = wrapH - offsetTop - 32 - 60;
         },
         methods: {
-
-            //获取工单的描述
-            getPlanMessage() {
-                this.$http({
-                    url: 'PlanMessage',
-                }).then(res => {
-                    this.Owner = res.Owner;
-                    this.WorkPlanName = res.WorkPlanName;
-                    this.ReleaseTime = res.ReleaseTime;
-                    this.getPercentage();
-                });
+            getPlanMessage(){
+                //获取工单的描述
+                return new Promise(resolve=>{
+                    this.$http({
+                        url: 'PlanMessage',
+                    }).then(res => {
+                        resolve(res);
+                    });
+                })
             },
-            //获取的百分比
-            getPercentage() {
-                this.$http({
-                    url: 'GetPercentage',
-                }).then(res => {
-                    this.Percentage = res;
-                    this.getTableColumn();
-                });
+            getPercentage(){
+                //获取的百分比
+                return new Promise(resolve => {
+                    this.$http({
+                        url: 'GetPercentage',
+                    }).then(res => {
+                        resolve(res);
+                    });
+                })
             },
-            getDataCenterData(pageSize, curPage, filter,) {
+            getTableColumn(){
+                return new Promise(resolve => {
+                    this.$http({
+                        url: "TableFiled",
+                        data: {
+                            "tableName": "WorkOrder"
+                        }
+                    }).then(res => {
+                        resolve(res);
+                    })
+                })
+            },
+            getDataCenter(pageSize, curPage, filter){
                 //获取表格的数据
-                this.tableData = [];
-                this.$http({
-                    url: 'DataCenter',
-                    data: {
-                        "PageSize": this.pagesize,
-                        "CurPage": curPage ? curPage : "1",
-                        "filter": filter ? JSON.stringify(filter) : null,
-                        "fuzzyFilter": this.fuzzyFilter,
-                        "workType":this.workItemType.type?this.workItemType.type:''
-                    },
-                }).then(res => {
-                    res.data = JSON.parse(res.data);
-                    this.tableData.push(...res.data);
-                    this.tableCount = res.total;
-                });
+                return new Promise(resolve => {
+                    //获取表格的数据
+                    this.tableData = [];
+                    this.$http({
+                        url: 'DataCenter',
+                        data: {
+                            "PageSize": this.pagesize,
+                            "CurPage": curPage ? curPage : "1",
+                            "filter": filter ? JSON.stringify(filter) : null,
+                            "fuzzyFilter": this.fuzzyFilter,
+                            "workType":this.workItemType.type?this.workItemType.type:''
+                        },
+                    }).then(res => {
+                        res.data = JSON.parse(res.data);
+                        this.tableData.push(...res.data);
+                        this.tableCount = res.total;
+                        resolve(res);
+                    });
+                })
             },
-            getTableColumn() {
-                //获取表格的列
-                this.$http({
-                    url: "TableFiled",
-                    data: {
-                        "tableName": "WorkOrder"
-                    }
-                }).then(res => {
+            renderPage(){
+                this.getPlanMessage().then(result=>{
+                    this.Owner = result.Owner;
+                    this.WorkPlanName = result.WorkPlanName;
+                    this.ReleaseTime = result.ReleaseTime;
+                    return this.getPercentage();
+                }).then(result=>{
+                    this.Percentage = result;
+                    return this.getTableColumn();
+                }).then(result=>{
                     this.columnsData = [];
                     this.columnsJson = [];
-                    res.forEach(item=>{
+                    result.forEach(item=>{
                         for(let props in item){
                             if(props!='type'){
                                 this.columnsData.push(item[props]);
@@ -193,18 +210,20 @@
                             }
                         }
                     });
-                    this.getDataCenterData();
+                    return this.getDataCenter();
+                }).catch(error=>{
+                    console.log(error);
                 })
             },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs);
+                this.getDataCenter(this.pagesize, this.currentPage, this.filterjs);
             },
             handleSizeChange: function (size) {
                 //table的页数发生改变触发事件
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs);
+                this.getDataCenter(this.pagesize, this.currentPage, this.filterjs);
             },
             filterShow() {
                 //高级筛选的按钮的点击事件
@@ -221,8 +240,9 @@
                     item.children[0].value = ''
                 });
                 this.filterjs = null;
-                this.getDataCenterData();
-                this.closeFilter();
+                this.getDataCenter().then(()=>{
+                    this.closeFilter();
+                });
             },
             confirm() {
                 //高级筛选的确定按钮
@@ -236,19 +256,20 @@
                     }
                 });
                 this.currentPage = 1;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter);
-                this.closeFilter();
+                this.getDataCenter(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter).then(()=>{
+                    this.closeFilter();
+                });
             },
             fuzzyInp() {
                 //模糊筛选的input事件
                 this.currentPage = 1;
-                this.getDataCenterData(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter.trim());
+                this.getDataCenter(this.pagesize, this.currentPage, this.filterjs, this.fuzzyFilter.trim());
             },
             changeWorkType(type,title){
                 this.workItemType.title = title;
                 this.workItemType.type = type;
                 this.currentPage = 1;
-                this.getDataCenterData();
+                this.getDataCenter();
             }
         }
     }

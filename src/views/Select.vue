@@ -38,19 +38,26 @@
             }
         },
         mounted() {
-            this.$http({
-                //这里是你自己的请求方式、url和data参数
-                url: 'SelectFuncs',
-            }).then(res => {
-                if (!res) {
-                   this.getFunc();
-                }
-            }, err => {
-                console.log(err);
-                this.ErrorMessage = "服务器繁忙,请稍后重试";
+            this.renderPage().then(()=>{
+                this.getFunc();
             });
         },
         methods: {
+            renderPage(){
+                return new Promise(resolve => {
+                    this.$http({
+                        //这里是你自己的请求方式、url和data参数
+                        url: 'SelectFuncs',
+                    }).then(res => {
+                        if (!res) {
+                            this.getFunc();
+                        }
+                    }, () => {
+                        this.ErrorMessage = "服务器繁忙,请稍后重试";
+                    });
+                    resolve('');
+                });
+            },
             getFunc(){
                 this.$http({
                     url: 'FunctionList',

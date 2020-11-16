@@ -99,13 +99,13 @@
                 tableOffset: null,
                 Serachres: '',
                 changeModelFlag: false,
-                filterBox:false,
-                filterjs:{},
-                fuzzyFilter:''
+                filterBox: false,
+                filterjs: {},
+                fuzzyFilter: ''
             }
         },
         computed: {
-            ...mapState(['CurImplementationResGroup','NavShow']),
+            ...mapState(['CurImplementationResGroup', 'NavShow']),
         },
         watch: {
             CurImplementationResGroup() {
@@ -121,36 +121,90 @@
             let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
             let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
             this.tableOffset = wrapH - offsetTop - 32 - 60;
-            this.GetResView();
-            this.getTableColumn();
-            let name = this.$route.params.name;
-            this.ResWorkView(name);
+            this.renderPage();
         },
         methods: {
             ...mapMutations(['ChangeCurImplementationResGroup']),
-            GetResView(resName) {
-                this.currentPage = 1;
-                if (!this.CurImplementationResGroup) {
-                    this.ChangeCurImplementationResGroup(this.$route.params.name);
-                }
-                this.$http({
-                    url: 'ResView',
-                    data: {
-                        'resGroup': this.CurImplementationResGroup,
-                        'resName': resName
-                    }
-                }).then(res => {
-                    if (res.resCount > 0) {
-                        this.ImplementationResView = JSON.parse(res.resView);
-                        if (document.getElementsByClassName('active').length > 0) {
-                            document.getElementsByClassName('active')[0].classList.remove('active');
-                        }
-                        this.resource = this.ImplementationResView[0].resName;
-                        this.ResWorkView(this.resource);
-                    }
+            renderPage() {
+                this.GetResView().then(() => {
+                    return this.ResWorkView(this.resource);
                 });
-                return this.ImplementationResView;
+                this.getTableColumn().then(res => {
+                    res.forEach(item => {
+                        let obj = {};
+                        for (let prop in item) {
+                            if (prop !== "type") {
+                                obj['key'] = prop;
+                                obj['value'] = item[prop];
+                            }
+                        }
+                        this.columnsData.push(obj);
+                    });
+                    return this.ResWorkView(this.$route.params.name)
+                });
             },
+            GetResView(resName) {
+                return new Promise(resolve => {
+                    this.currentPage = 1;
+                    if (!this.CurImplementationResGroup) {
+                        this.ChangeCurImplementationResGroup(this.$route.params.name);
+                    }
+                    this.$http({
+                        url: 'ResView',
+                        data: {
+                            'resGroup': this.CurImplementationResGroup,
+                            'resName': resName
+                        }
+                    }).then(res => {
+                        if (res.resCount > 0) {
+                            this.ImplementationResView = JSON.parse(res.resView);
+                            if (document.getElementsByClassName('active').length > 0) {
+                                document.getElementsByClassName('active')[0].classList.remove('active');
+                            }
+                            this.resource = this.ImplementationResView[0].resName;
+                        }
+                        resolve('');
+                    });
+                })
+            },
+            ResWorkView(resource, pageSize, curPage, changeModel) {
+                return new Promise(resolve => {
+                    this.$http({
+                        url: 'ResWorkView',
+                        data: {
+                            "PageSize": pageSize ? pageSize : "20",
+                            "CurPage": curPage ? curPage : "1",
+                            "Resource": resource,
+                            'GroupName': this.CurImplementationResGroup,
+                            'ChangeModel': changeModel ? changeModel : false,
+                            'filter': this.filterjs ? JSON.stringify(this.filterjs) : null,
+                            'fuzzyFilter': this.fuzzyFilter ? this.fuzzyFilter : "",
+                        }
+                    }).then(res => {
+                        this.tableCount = res.ImplementationCount;
+                        res.ImplementationData = JSON.parse(res.ImplementationData);
+                        this.tableData = res.ImplementationData;
+                        resolve(res);
+                    });
+                });
+
+            },
+            getTableColumn() {
+                return new Promise(resolve => {
+                    this.columnsData = [];
+                    //获取表格的列
+                    this.$http({
+                        url: "TableFiled",
+                        data: {
+                            "tableName": "WorkPlan"
+                        }
+                    }).then(res => {
+                        resolve(res)
+                    })
+                })
+            },
+
+
             more() {
                 this.resBodyShow = this.resBodyShow ? false : true
             },
@@ -169,30 +223,6 @@
                 this.tableData = [];
                 this.currentPage = 1;
             },
-            ResWorkView(resource, pageSize, curPage, changeModel) {
-                this.$http({
-                    url: 'ResWorkView',
-                    data: {
-                        "PageSize": pageSize ? pageSize : "20",
-                        "CurPage": curPage ? curPage : "1",
-                        "Resource": resource,
-                        'GroupName': this.CurImplementationResGroup,
-                        'ChangeModel': changeModel ? changeModel : false,
-                        'filter':this.filterjs?JSON.stringify(this.filterjs):null,
-                        'fuzzyFilter':this.fuzzyFilter?this.fuzzyFilter:"",
-                    }
-                }).then(res => {
-                    this.tableCount = res.ImplementationCount;
-                    res.ImplementationData = JSON.parse(res.ImplementationData);
-                    // res.ImplementationData.forEach(item => {
-                    //     item['需求日期'] = this.$Fun.foramateDate(item['需求日期']);
-                    //     item['计划开始'] = this.$Fun.formateTime(item['计划开始']);
-                    //     item['计划结束'] = this.$Fun.formateTime(item['计划结束']);
-                    //     item['切换开始'] = this.$Fun.formateTime(item['切换开始']);
-                    // });
-                    this.tableData = res.ImplementationData;
-                });
-            },
             handleCurrentChange: function (currentPage) {
                 this.currentPage = currentPage;
                 this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
@@ -203,27 +233,7 @@
                 this.currentPage = 1;
                 this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
             },
-            getTableColumn() {
-                this.columnsData = [];
-                //获取表格的列
-                this.$http({
-                    url: "TableFiled",
-                    data: {
-                        "tableName": "WorkPlan"
-                    }
-                }).then(res => {
-                    res.forEach(item=>{
-                        let obj = {};
-                        for (let prop in item){
-                            if(prop!=="type"){
-                                obj['key'] = prop;
-                                obj['value'] = item[prop];
-                            }
-                        }
-                        this.columnsData.push(obj);
-                    });
-                })
-            },
+
             allRes() {
                 this.pagesize = 20;
                 this.currentPage = 1;
@@ -270,13 +280,13 @@
                     }
                 });
                 this.currentPage = 1;
-                this.ResWorkView(this.resource,this.pagesize, this.currentPage,this.changeModelFlag);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
                 this.closeFilter();
             },
             fuzzyInp() {
                 //模糊筛选的input事件
                 this.currentPage = 1;
-                this.ResWorkView(this.resource,this.pagesize,this.currentPage,this.changeModelFlag);
+                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
             },
         }
     }
@@ -394,9 +404,11 @@
                 cursor: pointer;
             }
         }
-        #table{
+
+        #table {
             position: relative;
             margin-top: 15px;
+
             .filterBtn, .exportBtn {
                 padding: 6px;
                 font-size: 12px;
@@ -411,15 +423,18 @@
                 margin-bottom: 8px;
                 outline: none;
             }
+
             .fuzzyInp {
                 margin-left: 10px;
                 padding: 4px;
                 outline: none;
             }
+
             .exportBtn {
                 margin-right: 12px;
                 float: right;
             }
+
             .filterBox {
                 display: none;
                 position: absolute;
@@ -431,6 +446,7 @@
                 border: 1px solid #808080;
                 width: 300px;
                 border-radius: 4px;
+
                 p {
                     width: 100%;
                     padding: 4px;

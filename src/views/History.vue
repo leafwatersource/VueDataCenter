@@ -1,6 +1,6 @@
 <template>
     <div class="wrap" :class="{'WrapShow':!NavShow}">
-        <h1>手机报工操作记录</h1>
+        <h2>手机报工操作记录</h2>
         <p>
             <span @click="TodayData">查询今天的数据</span>
             <span @click="WeekData">查询最近七天</span>
@@ -8,6 +8,9 @@
             <span @click="ThreeMonthData">查询最近三个月</span>
             <span @click="HalfYearData">查询最近半年</span>
             <span @click="AllData" class="active">全部数据</span>
+        </p>
+        <p>
+            <input type="text" placeholder="模糊查询">
         </p>
         <div id="table" style="margin-top: 15px;">
             <el-table
@@ -67,47 +70,57 @@
             ...mapState(['NavShow']),
         },
         mounted() {
-            this.getTableCounmns();
+            this.renderPage();
             let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
             let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
             this.tableOffset = wrapH - offsetTop - 32;
         },
         methods: {
-            getTableCounmns() {
-                this.$http({
-                    url: "TableFiled",
-                    data: {
-                        "tableName": "History",
-                        "filter": this.filter
-                    }
-                }).then(res => {
+            renderPage(){
+                this.getTableCounmns().then(res=>{
                     this.columnsData = [];
                     res.forEach(item=>{
-                       for(let prop in item){
-                           if(prop !== 'type'){
-                               let obj = {};
-                               obj['key'] = prop;
-                               obj['value'] = item[prop];
-                               this.columnsData.push(obj);
-                           }
-                       }
+                        for(let prop in item){
+                            if(prop !== 'type'){
+                                let obj = {};
+                                obj['key'] = prop;
+                                obj['value'] = item[prop];
+                                this.columnsData.push(obj);
+                            }
+                        }
                     });
-                    this.getTableData();
-                });
+                    return this.getTableData();
+                })
             },
-            getTableData() {
-                this.$http({
-                    url: 'History',
-                    data: {
-                        "PageSize": this.pagesize,
-                        "CurPage": this.currentPage,
-                        "filter": this.filter,
-                    }
-                }).then(res => {
-                    this.tableCount = res.data['total'];
-                    this.tableData = [];
-                    res.data['rows'] = JSON.parse(res.data['rows']);
-                    this.tableData = res.data['rows'];
+            getTableCounmns(){
+              return new Promise(resolve => {
+                  this.$http({
+                      url: "TableFiled",
+                      data: {
+                          "tableName": "History",
+                          "filter": this.filter
+                      }
+                  }).then(res => {
+                      resolve(res);
+                  });
+              })
+            },
+            getTableData(){
+                return new Promise(resolve => {
+                    this.$http({
+                        url: 'History',
+                        data: {
+                            "PageSize": this.pagesize,
+                            "CurPage": this.currentPage,
+                            "filter": this.filter,
+                        }
+                    }).then(res => {
+                        this.tableCount = res.data['total'];
+                        this.tableData = [];
+                        res.data['rows'] = JSON.parse(res.data['rows']);
+                        this.tableData = res.data['rows'];
+                        resolve('success');
+                    })
                 })
             },
             handleCurrentChange: function (currentPage) {
@@ -117,7 +130,7 @@
             handleSizeChange: function (size) {
                 this.pagesize = size;
                 this.currentPage = 1;
-                this.getTableData(this.pagesize, this.currentPage);
+                this.getTableData();
             },
             TodayData(e) {
                 this.filter = this.$Fun.getCusDateTime('today');
@@ -135,7 +148,6 @@
             },
             WeekData(e) {
                 this.filter = this.$Fun.getCusDateTime('week');
-                console.log(this.filter);
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
                 e.target.classList.add('active');
