@@ -55,15 +55,14 @@
     export default {
         data() {
             return {
-                columnsData: [],
-                tableCount: 0,
-                currentPage: 1,
-                pageSize: 20,
-                curPage: 1,
-                pagesize: 20,
-                tableData: [],
-                tableOffset: null,
-                filter: '',
+                columnsData: [],//表格的列名
+                tableCount: 0,//表格的数据量
+                currentPage: 1,//当前选择的页数
+                curPage: 1,//当前的页数
+                pagesize: 20,//一页多少条数据
+                tableData: [],//表格的数据
+                tableOffset: null,//表格的高度
+                filter: '',//表格筛选条件
             }
         },
         computed: {
@@ -71,12 +70,11 @@
         },
         mounted() {
             this.renderPage();
-            let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
-            let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
-            this.tableOffset = wrapH - offsetTop - 32;
+            this.setTableHeight();
         },
         methods: {
             renderPage(){
+                //页面初始化
                 this.getTableCounmns().then(res=>{
                     this.columnsData = [];
                     res.forEach(item=>{
@@ -92,7 +90,18 @@
                     return this.getTableData();
                 })
             },
+            setTableHeight(){
+                let offsetTop = document.getElementById('table').offsetTop;
+                let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
+                this.tableOffset = wrapH - offsetTop;
+                window.onresize = ()=>{
+                    let offsetTop = document.getElementById('table').offsetTop;
+                    let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
+                    this.tableOffset = wrapH - offsetTop;
+                }
+            },
             getTableCounmns(){
+                //获取表格的列名
               return new Promise(resolve => {
                   this.$http({
                       url: "TableFiled",
@@ -106,7 +115,8 @@
               })
             },
             getTableData(){
-                return new Promise(resolve => {
+                //获取表格数据
+                return new Promise(() => {
                     this.$http({
                         url: 'History',
                         data: {
@@ -119,20 +129,22 @@
                         this.tableData = [];
                         res.data['rows'] = JSON.parse(res.data['rows']);
                         this.tableData = res.data['rows'];
-                        resolve('success');
                     })
                 })
             },
             handleCurrentChange: function (currentPage) {
+                //点击下一页，获取点击某一页
                 this.currentPage = currentPage;
                 this.getTableData(this.pagesize, this.currentPage);
             },
             handleSizeChange: function (size) {
+                //改变一页展示的数据量
                 this.pagesize = size;
                 this.currentPage = 1;
                 this.getTableData();
             },
             TodayData(e) {
+                //获取今天的数据
                 this.filter = this.$Fun.getCusDateTime('today');
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
@@ -140,6 +152,7 @@
                 this.getTableData();
             },
             ThreeMonthData(e) {
+                //获取近三个月的数据
                 this.filter = this.$Fun.getCusDateTime('ThreeMonth');
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
@@ -147,6 +160,7 @@
                 this.getTableData();
             },
             WeekData(e) {
+                //获取一周内的数据
                 this.filter = this.$Fun.getCusDateTime('week');
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
@@ -154,6 +168,7 @@
                 this.getTableData();
             },
             MonthData(e) {
+                //获取一个月内的数据
                 this.filter = this.$Fun.getCusDateTime('month');
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
@@ -161,6 +176,7 @@
                 this.getTableData();
             },
             HalfYearData(e) {
+                //获取半年内的数据
                 this.filter = this.$Fun.getCusDateTime('HalfYear');
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');
@@ -168,6 +184,7 @@
                 this.getTableData();
             },
             AllData(e) {
+                //获取所有的数据
                 this.filter = "";
                 this.currentPage = 1;
                 document.getElementsByClassName('active')[0].classList.remove('active');

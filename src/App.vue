@@ -1,74 +1,86 @@
 <template>
     <div id="app">
-        <div id="top"
-             v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
-        >
-            <span class="message" v-text="'订单查询-PlanMate-APS'"/>
-            <span class="fa fa-bars menu" @click="MenuShow"/>
-
-            <el-dropdown trigger="click" class="Me">
-                <span class="el-dropdown-link" v-text="Name" style="color: white;"/>
-                <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item class="clearfix">
-                        用户设置
-                    </el-dropdown-item>
-                    <el-dropdown-item class="clearfix">
-                        <span @click="Quit">退出登录</span>
-                    </el-dropdown-item>
-                </el-dropdown-menu>
-            </el-dropdown>
-        </div>
-        <el-menu
-                :default-active="defaultActiveIndex"
-                v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
-                class="el-menu-vertical-demo"
-                @close="handleClose"
-                background-color="#212529"
-                text-color="#fff"
-                id="nav"
-                router
-                :collapse="NavShow"
-                :collapse-transition="false"
-                active-text-color="#007bff">
-            <img src="./assets/image/logo-white.png" style="height: 80px;" v-if="!NavShow" alt/>
-            <el-menu-item index="1" route="/DataCenter">
-                <i class="el-icon-menu"></i>
-                <span slot="title">订单查询</span>
-            </el-menu-item>
-            <el-submenu index="2">
-                <template slot="title">
-                    <i class="el-icon-location"></i>
-                    <span>执行计划</span>
-                </template>
-                <el-menu-item-group>
-                    <el-menu-item :index="'/Implementation/'+item.viewname" :route="'/Implementation/'+item.viewname"
-                                  v-for="item in ImplementationResGroup"
-                                  :key="item.viewname"
-                                  v-text="item.viewname"
-                                  :data="item.viewname"
-                                  @click="ImplementationClick"
-                    />
-                </el-menu-item-group>
-            </el-submenu>
-            <el-menu-item index="/history">
-                <i class="el-icon-setting"></i>
-                <span slot="title">事件记录</span>
-            </el-menu-item>
-            <el-submenu index="4">
-                <template slot="title">
-                    <i class="fa fa-bar-chart MyIcon" />
-                    <span>统计中心</span>
-                </template>
-                <el-menu-item-group>
-                    <el-menu-item index="/Statistics">设备状态</el-menu-item>
-                    <el-menu-item index="/Statistics">设备负载</el-menu-item>
-                    <el-menu-item index="/Statistics">生产达成</el-menu-item>
-                    <el-menu-item index="/Statistics">订单生产进度</el-menu-item>
-                    <el-menu-item index="/ResStatistics">产能分析</el-menu-item>
-                </el-menu-item-group>
-            </el-submenu>
-        </el-menu>
-        <router-view/>
+        <el-container id="topWrap" height="100%"
+                      v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')">
+            <el-header id="top">
+                <span class="message" v-text="'订单查询-PlanMate-APS'"/>
+                <span class="fa fa-bars menu" @click="MenuShow"/>
+                <el-dropdown trigger="click" class="Me">
+                    <span class="el-dropdown-link" v-text="Name" style="color: white;"/>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item class="clearfix">
+                            用户设置
+                        </el-dropdown-item>
+                        <el-dropdown-item class="clearfix">
+                            <span @click="Quit">退出登录</span>
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </el-header>
+            <el-container class="Conent" height="">
+                <el-aside :class="{'asideShow':true,'asideHide':NavShow}"
+                          v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
+                >
+                    <el-menu
+                            :default-active="defaultActiveIndex"
+                            v-if="($route.name!=='Login')&&($route.name!=='Select')&&($route.name!=='NotFound')&&($route.name!=='Error')"
+                            class="el-menu-vertical-demo"
+                            @close="handleClose"
+                            background-color="#212529"
+                            text-color="#fff"
+                            id="nav"
+                            router
+                            :collapse="NavShow"
+                            :collapse-transition="false"
+                            active-text-color="#007bff">
+                        <img src="./assets/image/logo-white.png" style="height: 80px;" v-if="!NavShow" alt/>
+                        <el-menu-item index="1" route="/DataCenter">
+                            <i class="el-icon-menu"></i>
+                            <span slot="title">订单查询</span>
+                        </el-menu-item>
+                        <el-submenu index="2">
+                            <template slot="title">
+                                <i class="el-icon-location"></i>
+                                <span>执行计划</span>
+                            </template>
+                            <el-menu-item-group>
+                                <el-menu-item :index="'/Implementation/'+item.viewname"
+                                              :route="'/Implementation/'+item.viewname"
+                                              v-for="item in ImplementationResGroup"
+                                              :key="item.viewname"
+                                              v-text="item.viewname"
+                                              :data="item.viewname"
+                                              @click="ImplementationClick"
+                                />
+                            </el-menu-item-group>
+                        </el-submenu>
+                        <el-menu-item index="/history">
+                            <i class="el-icon-setting"></i>
+                            <span slot="title">事件记录</span>
+                        </el-menu-item>
+                        <el-submenu index="4">
+                            <template slot="title">
+                                <i class="fa fa-bar-chart MyIcon"/>
+                                <span>统计中心</span>
+                            </template>
+                            <el-menu-item-group>
+                                <el-menu-item index="/Statistics">设备状态</el-menu-item>
+                                <!--<el-menu-item index="/Statistics">设备负载</el-menu-item>-->
+                                <!--<el-menu-item index="/Statistics">生产达成</el-menu-item>-->
+                                <!--<el-menu-item index="/Statistics">订单生产进度</el-menu-item>-->
+                                <!--<el-menu-item index="/ResStatistics">产能分析</el-menu-item>-->
+                            </el-menu-item-group>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+                <el-main>
+                    <router-view/>
+                </el-main>
+            </el-container>
+        </el-container>
+        <template v-else>
+            <router-view/>
+        </template>
     </div>
 </template>
 <script>
@@ -98,13 +110,13 @@
         },
         watch: {
             $route(to) {
-                if (to.path!='#/Select'&&to.path!='#/'&&to.path!='/') {
+                if (to.path != '#/Select' && to.path != '#/' && to.path != '/') {
                     this.GetImplementationData();
                 }
             }
         },
         mounted() {
-            if (window.location.hash!='#/Select'&&window.location.hash!='#/'&&window.location.hash!='/') {
+            if (window.location.hash != '#/Select' && window.location.hash != '#/' && window.location.hash != '/') {
                 this.GetImplementationData();
             }
         }
@@ -178,53 +190,55 @@
             width: 100%;
             height: 100%;
 
-            #top {
-                width: 100%;
-                height: 50px;
-                position: fixed;
-                background-color: #343a40;
-                color: white;
-                z-index: 10;
+            #topWrap {
+                height: 100%;
 
-                .message {
-                    position: absolute;
-                    left: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                }
+                #top {
+                    position: relative;
+                    background-color: #343a40;
+                    color: white;
+                    z-index: 10;
 
-                .menu {
-                    position: absolute;
-                    left: 200px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    cursor: pointer;
-                }
+                    .message {
+                        position: absolute;
+                        left: 15px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
 
-                .Me {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                }
+                    .menu {
+                        position: absolute;
+                        left: 200px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        cursor: pointer;
+                    }
 
-                .userBox {
-                    position: fixed;
-                    right: 15px;
-                    top: 50px;
-                    background-color: #212529;
-                    font-size: 14px;
-                    display: none;
-                    height: 0;
+                    .Me {
+                        position: absolute;
+                        right: 15px;
+                        top: 60%;
+                        transform: translateY(-50%);
+                    }
 
-                    ul {
-                        li {
-                            list-style: none;
-                            height: 30px;
-                            line-height: 30px;
-                            color: white;
-                            text-align: center;
-                            padding: 0 15px;
+                    .userBox {
+                        position: fixed;
+                        right: 15px;
+                        top: 50px;
+                        background-color: #212529;
+                        font-size: 14px;
+                        display: none;
+                        height: 0;
+
+                        ul {
+                            li {
+                                list-style: none;
+                                height: 30px;
+                                line-height: 30px;
+                                color: white;
+                                text-align: center;
+                                padding: 0 15px;
+                            }
                         }
                     }
                 }
@@ -247,44 +261,48 @@
                 }
             }
 
-            #nav {
-                position: fixed;
-                left: 0;
-                top: 50px;
-                background-color: #212529;
-                height: calc(100% - 50px);
-                z-index: 10;
-                overflow-y: scroll;
-                img {
-                    display: block;
-                    width: 70%;
-                    margin: 20px auto;
+            .Conent {
+                overflow: hidden;
+                height:calc(100% - 60px);
+                .asideShow {
+                    width: 200px !important;
+
+                    #nav {
+                        background-color: #212529;
+                        height: 100%;
+                        z-index: 10;
+                        overflow-y: scroll;
+
+                        img {
+                            display: block;
+                            width: 70%;
+                            margin: 20px auto;
+                            box-sizing: border-box;
+                        }
+
+                        .MyIcon {
+                            margin: 0 6px;
+                            margin-right: 8px;
+                        }
+                    }
+                }
+
+                .asideHide {
+                    width: 65px !important;
+                }
+
+                #nav::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .hide {
+                    display: none;
+                }
+
+                .wrap {
+                    min-height: 100%;
                     box-sizing: border-box;
                 }
-                .MyIcon{
-                    margin: 0 6px;
-                    margin-right: 8px;
-                }
-            }
-            #nav::-webkit-scrollbar{
-                display: none;
-            }
-            .hide {
-                display: none;
-            }
-
-            .wrap {
-                width: calc(100% - 239px);
-                margin-left: 239px;
-                padding: 0 15px;
-                padding-top: 65px;
-                min-height: 100%;
-                box-sizing: border-box;
-            }
-
-            .WrapShow {
-                width: calc(100% - 64px) !important;
-                margin-left: 64px !important;
             }
         }
     }
@@ -298,10 +316,6 @@
             .menu {
                 left: 178px !important;
             }
-        }
-
-        #nav {
-            display: none !important;
         }
         .wrap {
             width: 100% !important;

@@ -5,17 +5,17 @@
                 <div class="resCon">
                     <div class="res" v-for="item in resData" :key="item.ViewName"
                          @click="resGroupClick(item)"
-                         v-text="'设备:'+item.ViewName"/>
+                         v-text="'设备:'+item.ViewName"></div>
                 </div>
             </div>
         </div>
         <div class="messageBox" v-else>产能分析没有数据</div>
 
         <div class="echartBox" v-if="resData.length!='0'">
-            <p v-if="curResGroup.ViewName " v-text="'设备组:'+curResGroup.ViewName"/>
+            <p v-if="curResGroup.ViewName " v-text="'设备组:'+curResGroup.ViewName"></p>
             <div class="tableBox">
                 <p>
-                    <el-select v-model="CurResName" filterable placeholder="请选择" @change="resChange">
+                    <el-select v-model="CurResName" filterable placeholder="请选择" @change="resChange" value="">
                         <el-option
                                 v-for="item in options"
                                 :key="item.value"
@@ -48,7 +48,7 @@
                     </el-table>
                 </div>
             </div>
-            <div class="chart" id="chart" v-if="resStatisticsData.length!='0'"></div>
+            <div class="chart" id="chart" v-if="resStatisticsData.length!=='0'"></div>
             <div class="chart" v-else>
                 <span class="messageText">当前没有统计信息</span>
             </div>
@@ -64,25 +64,179 @@
         name: "ResStatistics",
         data() {
             return {
-                resData: [],
-                timeType: 'W',
-                echartsxAxis: [],
-                resStatisticsData: [],
-                resListData: [],
-                resList: [],
-                curResGroup: '',
-                columnsData: ['resName', 'fromDay', 'toDay', 'resNeedHour', 'resWorkHour', 'hourRatio', 'pmUID'],
-                options: [],
-                CurResName: ''
+                resData: [],//所有的设备组
+                timeType: 'W',//时间的类型
+                echartsxAxis: [],//echart的横轴
+                resStatisticsData: [],//
+                resListData: [],//设备的事件记录
+                resList: [],//所有的设备
+                curResGroup: '',//当前的设备组
+                columnsData: ['resName', 'fromDay', 'toDay', 'resNeedHour', 'resWorkHour', 'hourRatio', 'pmUID'],//表格的列名
+                options: [],//下拉框设备选项
+                CurResName: ''//当前的设备名称
             }
         },
         computed: {
             ...mapState(['NavShow']),
         },
         mounted() {
-            this.GetResGroup();
+            this.renderPage();
         },
         methods: {
+            renderPage() {
+                this.GetResGroupPromise().then(res => {
+                    this.resData = [];
+                    if (res.resGroup != "[]") {
+                        res.resGroup = JSON.parse(res.resGroup);
+                        this.resData = res.resGroup;
+                        this.curResGroup = res.resGroup[0];
+
+                    }
+                    return this.GetResListPromise(this.curResGroup)
+                }).then(res => {
+                    this.options = [];
+                    this.resList = [];
+                    if (res.resList) {
+                        res.resList = JSON.parse(res.resList);
+                        res.resList.forEach(item => {
+                            let obj = {
+                                value: item['resName'],
+                                label: item['resName']
+                            };
+                            this.options.push(obj);
+                            this.resList.push(item['resName']);
+                        });
+                        this.GetResGroupTable();
+                    }
+                    return this.resGroupClickPromise(this.curResGroup);
+                }).then(res => {
+                    res.resData = JSON.parse(res.resData);
+                    if (res.resData.length > 0) {
+                        this.echartsxAxis = [];
+                        this.resStatisticsData = [];
+                        this.resStatisticsData.push({
+                            name: '资源工时',
+                            type: 'bar',
+                            data: [],
+                            yAxisIndex: 0,
+                            color: '#CC0066',
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true, //开启显示
+                                        position: 'top', //在上方显示
+                                        textStyle: { //数值样式
+                                            color: 'black',
+                                            fontSize: 16
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        this.resStatisticsData.push({
+                            name: '任务工时',
+                            type: 'bar',
+                            data: [],
+                            yAxisIndex: 0,
+                            color: '#009999',
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true, //开启显示
+                                        position: 'top', //在上方显示
+                                        textStyle: { //数值样式
+                                            color: 'black',
+                                            fontSize: 16
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        this.resStatisticsData.push({
+                            name: '工时比例',
+                            type: 'line',
+                            data: [],
+                            yAxisIndex: 1,
+                            color: '#FFCC33',
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true, //开启显示
+                                        position: 'top', //在上方显示
+                                        textStyle: { //数值样式
+                                            color: 'black',
+                                            fontSize: 16
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        res.resData.forEach(item => {
+                            item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
+                            item['toDay'] = this.$Fun.foramateDate(item['toDay']);
+                            let column = item['fromDay'] + '/' + item['toDay'];
+                            this.echartsxAxis.push(column);
+                            this.resStatisticsData[0].data.push(item['resNeedHour']);
+                            this.resStatisticsData[1].data.push(item['resWorkHour']);
+                            this.resStatisticsData[2].data.push(item['hourRatio']);
+                        });
+                    }
+                    if (this.resStatisticsData.length > 0) {
+                        console.log(this.curResGroup);
+                        return this.initChart(this.curResGroup['ViewName']);
+                    }
+
+                }).then(() => {
+                    console.log('请求完成');
+                })
+            },
+            GetResGroupPromise() {
+                return new Promise(resolve => {
+                    //获取设备组
+                    this.$http({
+                        url: 'GetResGroup'
+                    }).then(res => {
+                        resolve(res);
+                    })
+                });
+
+            },
+            GetResListPromise(resGroup) {
+                return new Promise(resolve => {
+                    //获取设备组下所有的设备
+                    this.$http({
+                        url: 'GetResList',
+                        data: {
+                            "viewId": resGroup.ViewID
+                        }
+                    }).then(res => {
+                        resolve(res)
+
+                    })
+                });
+            },
+            resGroupClickPromise(resGroupItem) {
+                return new Promise(resolve => {
+                    //设备组的点击事件
+                    this.curResGroup = resGroupItem;
+                    //设备的统计信息
+                    this.GetResList(resGroupItem);
+
+                    this.CurResName = '';
+                    this.$http({
+                        url: 'GetResStatistics',
+                        data: {
+                            "resName": resGroupItem.ViewName,
+                            "timeType": 'W'
+                        }
+                    }).then(res => {
+                        resolve(res)
+                    })
+                })
+
+            },
+
+
             GetResGroup() {
                 //获取设备组
                 this.$http({
@@ -123,8 +277,6 @@
                 })
             },
             initChart(resName) {
-                console.log(this.resStatisticsData);
-                console.log(this.echartsxAxis);
                 //初始化echart统计图
                 var myChart = echarts.init(document.getElementById('chart'));
                 var option = {
@@ -183,11 +335,10 @@
                         "timeType": 'W'
                     }
                 }).then(res => {
-                    console.log(res);
+                    this.echartsxAxis = [];
                     res.resData = JSON.parse(res.resData);
+                    this.resStatisticsData = [];
                     if (res.resData.length > 0) {
-                        this.echartsxAxis = [];
-                        this.resStatisticsData = [];
                         this.resStatisticsData.push({
                             name: '资源工时',
                             type: 'bar',
@@ -282,6 +433,8 @@
             },
             resClick() {
                 //设备的统计信息
+                this.resStatisticsData = [];
+                this.echartsxAxis = [];
                 this.$http({
                     url: 'GetResStatistics',
                     data: {
@@ -292,8 +445,6 @@
                 }).then(res => {
                     res.resData = JSON.parse(res.resData);
                     if (res.resData.length > 0) {
-                        this.echartsxAxis = [];
-                        this.resStatisticsData = [];
                         this.resStatisticsData.push({
                             name: '资源工时',
                             type: 'bar',
@@ -325,9 +476,8 @@
                             this.resStatisticsData[2].data.push(item['hourRatio']);
                         });
                     }
-                    if (this.resStatisticsData.length > 0) {
-                        this.initChart(this.CurResName);
-                    }
+
+                    this.initChart(this.CurResName);
                 })
             },
             GetResDetail() {
@@ -340,7 +490,7 @@
                     console.log(res)
                     res.resData = JSON.parse(res.resData);
                     this.resListData = [];
-                    if (res.resData.length>0) {
+                    if (res.resData.length > 0) {
                         res.resData = JSON.parse(res.resData);
                         res.resData.forEach(item => {
                             item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);

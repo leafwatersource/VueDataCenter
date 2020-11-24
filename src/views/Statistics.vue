@@ -3,69 +3,145 @@
 
         <div class="inputBox">请输入设备名称 <input type="text" placeholder="请输入设备名称"></div>
         <div class="top">
-            <div class="topCon">
-                <div class="res" v-for="item in resStatus" :key="item.resname"
+        <el-row :gutter="20">
+            <el-col :xs="12" :sm="8" :md="4" :lg="4" :xl="4" v-for="item in resStatus"
+                    :key="item.resname"
+                    :title="item.description"
+                    >
+                <div class="grid-content res"
+                     :class="{'resK':item.resstate=='2'?true:false,'Error':item.resstate=='3'?true:false}"
                      @click="resClick(item)"
-                     :data="item"
-                     :title="item.description"
-                     :class="{'resK':item.resstate=='2'?true:false,'Error':item.resstate=='3'?true:false}">
-                    <span  v-text="'设备名称:'+item.resname"/>
+                     >
+                    <span v-text="'设备名称:'+item.resname"/>
                     <span v-if="item.resorderbean" v-text="item.resComment+':'+item.resorderbean.workID"/>
                     <span text="item.resComment"/>
                     <span v-if="item.resorderbean" v-text="'描述:'+item.resorderbean.itemDesp"/>
                 </div>
-            </div>
+            </el-col>
+        </el-row>
         </div>
+        <!--<div class="top">-->
+            <!--<div class="topCon">-->
+                <!--<div class="res" v-for="item in resStatus" :key="item.resname"-->
+                     <!--@click="resClick(item)"-->
+                     <!--:data="item"-->
+                     <!--:title="item.description"-->
+                     <!--:class="{'resK':item.resstate=='2'?true:false,'Error':item.resstate=='3'?true:false}">-->
+                    <!--<span v-text="'设备名称:'+item.resname"/>-->
+                    <!--<span v-if="item.resorderbean" v-text="item.resComment+':'+item.resorderbean.workID"/>-->
+                    <!--<span text="item.resComment"/>-->
+                    <!--<span v-if="item.resorderbean" v-text="'描述:'+item.resorderbean.itemDesp"/>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
         <div class="main">
             <h2 v-if="curRes.resname" v-text="'当前设备:'+curRes.resname"/>
-            <div class="ChartBox">功能即将上线Loading...</div>
+            <div class="ChartBox">功能即将上线Loading...
+                <span v-if="Equipment!=null" v-text="'设备负载率:'+Equipment+'%'"></span>
+                <span v-if="ResFinishNum!=null" v-text="'设备达成率:'+ResFinishNum+'%'"></span>
+                <span v-if="curDayShift!=null" v-text="'curDayShift:'+curDayShift"></span>
+                <!--<span v-if="dayShift!=null" v-text="'dayShift:'+dayShift[0]['ResCalShift']"></span>-->
+            </div>
         </div>
     </div>
 </template>
 
 <script>
     import {mapState} from 'vuex'
+
     export default {
         name: "Statistics",
         data() {
             return {
-                resStatus: [],
-                curRes: ''
+                resStatus: [],//所有的设备
+                curRes: '',//当前的设备
+                Equipment: null,//设备负载率
+                ResFinishNum: null,//设备达成率
+                dayShift: [],//当前设备一共有多少个班次
+                curDayShift:null,//当前的班次
+                filterStartTime:null,//筛选的开始时间
+                filterEndTime:null,//筛选的结束时间
             }
         },
         computed: {
+            //判断导航栏是否展示
             ...mapState(['UserMessage', 'NavShow']),
         },
 
         mounted() {
-           this.renderPage();
+            this.renderPage();
         },
         methods: {
-            renderPage(){
-                this.GetResStatusPromise().then(res=>{
+            renderPage() {
+                this.GetResStatus().then(res => {
                     this.resStatus = [];
                     this.resStatus = res;
                     this.curRes = res[0];
+                }).then(() => {
+                    return this.GetDataShift();
+                }).then(() => {
                 });
             },
-            GetResStatusPromise(){
-                //获取设备状态
+            GetDataShift() {
+                //获取设备有多少个班次，和当前是什么班次，如果当前班次为0表示没有没有排班
+                return new Promise(resolve => {
+                    this.$http({
+                        url: 'GetDataShift',
+                        data: {
+                            "ResName": this.curRes['resname']
+                        }
+                    }).then(res => {
+                        res['dayShift'] = JSON.parse(res['dayShift']);
+                        this.curDayShift = res['curdayshift'];
+                        this.dayShift = [];
+                        this.dayShift = [...res['dayShift']];
+                        console.log(this.dayShift);
+                        resolve(res)
+                    });
+                })
+            },
+            GetResStatus() {
+                //获取所有的设备
                 return new Promise(resolve => {
                     this.$http({
                         url: "GetResStatus",
                         data: {
-                            'empid':this.$cookie.get('empID')
+                            'empid': this.$cookie.get('empID')
                         }
                     }).then(res => {
                         resolve(res);
-                        console.log(res);
-
                     })
+                })
+            },
+            GetCurResProduct() {
+                return new Promise(resolve => {
+                    this.$http({
+                        url: "GetCurResProduct",
+                        data: {
+                            "CurResName": this.curRes['resname']
+                        }
+                    }).then(res => resolve(res));
                 })
             },
             resClick(item) {
                 //设备的点击事件
                 this.curRes = item;
+                this.GetCurResProduct().then(res => {
+                    this.Equipment = res;
+                    return this.GetProductFinish();
+                }).then(() => {
+                    this.GetDataShift();
+                })
+
+            },
+            GetProductFinish() {
+
+                this.$http({
+                    url: 'GetProductFinish',
+                    data: {
+                        "ResName": this.curRes['resname']
+                    }
+                }).then(res => this.ResFinishNum = res);
             },
         }
     }
@@ -78,15 +154,13 @@
         padding: 10px 0;
         overflow-y: scroll;
         scrollbar-width: none; /* Firefox */
-
-        .topCon {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: row;
-            align-content: flex-start;
-
+        /*.topCon {*/
+            /*width: 100%;*/
+            /*height: 100%;*/
+            /*display: flex;*/
+            /*flex-wrap: wrap;*/
+            /*flex-direction: row;*/
+            /*align-content: flex-start;*/
             .res {
                 height: 50px;
                 background-color: #018578;
@@ -99,7 +173,7 @@
                 border-radius: 4px;
                 box-shadow: 1px 1px 5px #cccccc;
                 cursor: pointer;
-                width: 296px;
+
                 span {
                     font-size: 12px;
                     color: white;
@@ -107,10 +181,10 @@
                     width: 100%;
                     white-space: nowrap; /*强制在一行显示*/
                     text-overflow: ellipsis; /*设置超出内容显示...*/
-                    overflow: hidden; /*一定不能少 超出的内容进行隐藏*/
+                    overflow: hidden;
                 }
-
             }
+
             .Error {
                 background-color: #cd2626;
             }
@@ -124,12 +198,12 @@
                 color: white;
             }
         }
+    /*}*/
 
-
-    }
     .top::-webkit-scrollbar {
         display: none; /* Chrome Safari */
     }
+
     .main {
         .ChartBox {
             width: 100%;
@@ -137,7 +211,6 @@
         }
     }
 </style>
-
 
 
 

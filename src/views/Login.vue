@@ -4,22 +4,22 @@
             <div class="left">
                 <div class="imgBox">
                     <img src="../assets/image/logo-white.png" alt/>
-                    <p class="imgdesc" v-text="'您身边更专业的计划专家'"/>
+                    <p class="imgdesc" v-text="'您身边更专业的计划专家'"></p>
                 </div>
             </div>
             <div class="right">
                 <div class="inputBox">
-                    <p class="title" v-text="'用户登陆'"/>
+                    <p class="title" v-text="'用户登陆'"></p>
                     <input type="text" placeholder="用户名" v-model="EmpID"/>
                     <form>
                         <input type="password" placeholder="密码" v-model="UserPass"/>
                     </form>
-                    <button @click="LoginClick" v-text="'登陆'" v-if="LoginState"/>
+                    <button @click="LoginClick" v-text="'登陆'" v-if="LoginState"></button>
                     <div class="fouceOut" v-else>
-                        <button v-text="'强制登录'" @click="LogOut"/>
-                        <button v-text="'取消'" class="cancel" @click="cancel"/>
+                        <button v-text="'强制登录'" @click="LogOut"></button>
+                        <button v-text="'取消'" class="cancel" @click="cancel"></button>
                     </div>
-                    <div class="errorBox" v-text="ErrorMessage"/>
+                    <div class="errorBox" v-text="ErrorMessage"></div>
                 </div>
             </div>
         </div>
@@ -29,16 +29,17 @@
     export default {
         data() {
             return {
-                EmpID: "",
-                UserPass: "",
-                ErrorMessage: "",
-                LoginState: true
+                EmpID: "",//用户的id
+                UserPass: "",//用户的密码
+                ErrorMessage: "",//模态框错误信息
+                LoginState: true//登录状态
             };
         },
         mounted() {
         },
         methods: {
             hasLogin() {
+
                 return new Promise( (resolve, reject)=> {
                     if (this.EmpID == "") {
                         // 判断用户名是否为空
@@ -52,9 +53,12 @@
                         reject('请输入密码');
                         return;
                     }
+                    //根据cookie值获取token值
                     let token = this.$cookie.get('token');
+                    //根据cookie值获取empid
                     let empid = this.$cookie.get('empID');
                     if (typeof token === "string" && empid&&empid==this.EmpID) {
+                        //判断用户是否是上次登录了
                         this.$http({
                             url: "HasLogin",
                             data: {
@@ -82,12 +86,13 @@
                                 "pwd": this.UserPass
                             }
                         }).then(res => {
-                            console.log(res);
                             if (res.loginState !== "0") {
                                 if (res.loginState == "1") {
+                                    //登录成功
                                     this.$router.push("/Select");
                                     return;
                                 } else {
+                                    //登录失败
                                     this.LoginState = false;
                                 }
                             }
@@ -101,14 +106,10 @@
                         this.LogOut();
                     }
                 });
-                //登录查询
-                // 设置cookie默认过期时间单位是1d(1天)
-                // 跳转到选择页面
-                // this.$router.push("/Select");
             },
             LogOut() {
+                //强制登录
                 this.$http({
-                    //这里是你自己的请求方式、url和data参数
                     url: 'LogOut',
                     data: {
                         "empID": this.EmpID,
@@ -119,16 +120,15 @@
                         this.$cookie.set("token", res.userGuid, 1);
                         this.$cookie.set("empID", res.empID, 1);
                         this.GetUserMessage();
-
                     } else {
                         this.ErrorMessage = res.message;
                     }
-                }, err => {
-                    console.log(err);
+                }, () => {
                     this.ErrorMessage = "服务器繁忙,请稍后重试";
                 });
             },
             GetUserMessage() {
+                //获取用户的信息
                 this.$http({url: 'UserMessage'}).then(res => {
                     this.$store.state.UserMessage = res[0];
                     this.$cookie.set("empName", res[0].empName, 1);
@@ -137,6 +137,7 @@
                 })
             },
             cancel() {
+                //取消按钮的点击事件
                 this.LoginState = true;
                 this.ErrorMessage = '';
                 this.EmpID = '';

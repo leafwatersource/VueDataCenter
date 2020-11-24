@@ -1,6 +1,5 @@
 <template>
     <div class="about wrap" :class="{'WrapShow':!NavShow}">
-        <!--<h1>这个是关于页面</h1>-->
         <div class="resBox">
             <div class="resTitle">
                 <i class="fa fa-laptop"/>
@@ -15,7 +14,7 @@
                 </ul>
             </div>
         </div>
-        <div class="CurResDetail" style="position">
+        <div class="CurResDetail">
             <i class="fa fa-table"></i>
             <span>当前计划详情</span>
             <p class="all" @click="allRes">所有设备</p>
@@ -24,26 +23,8 @@
             <span style="position: absolute;right: 15px;" @click="ChangeModel">换模计划</span>
         </div>
         <div id="table">
-            <button class="filterBtn" @click="filterShow">高级筛选</button>
             <button class="exportBtn">导出数据</button>
-            <div class="filterBox" :class="{'show':filterBox}">
-                <p>* 请选择筛选条件 <i class="fa fa-times" aria-hidden="true" @click="closeFilter"></i></p>
-                <div class="conMain">
-                    <div class="con" v-for="item in columnsData" :key="item.key">
-                        <div class="cLeft" v-text="item.value+':'"/>
-                        <div class="cRight">
-                            <input type="text" :data="item.key">
-                        </div>
-                    </div>
-                </div>
-                <div class="filterBtnGroup">
-                    <div class="btnCon">
-                        <button class="reset" @click="filterReset" v-text="'重置'"/>
-                        <button class="confirm" @click="confirm" v-text="'搜索'"/>
-                    </div>
-                </div>
-
-            </div>
+            <filterInput :columnsJson="columnsData" :filterBox="filterBox" @UpdatefilterBox="UpdatefilterBox" @updateData="updateData" />
             <input type="text" class="fuzzyInp" placeholder="模糊筛选" v-model="fuzzyFilter" @input="fuzzyInp">
             <el-table
                     :data="tableData"
@@ -56,9 +37,9 @@
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
             >
-                <template v-for="item in columnsData">
+                <template v-for="(item,index) in columnsData">
                     <el-table-column
-                            :key="item.key"
+                            :key="item.key+index"
                             :prop="item.value"
                             :label="item.value"
                             sortable
@@ -73,7 +54,7 @@
                     layout="total, sizes, prev, pager, next, jumper"
                     @size-change="handleSizeChange"
                     @current-change="handleCurrentChange"
-                    :current-page="currentPage"
+                    :current-page="curPage"
                     :page-sizes="[ 10, 20, 50,100]"
                     :page-size="pagesize"
                     :total="tableCount">
@@ -83,25 +64,28 @@
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
-
+    import filterInput from '../components/public/filterInput'
     export default {
+        components:{
+            filterInput
+        },
         data() {
             return {
-                ImplementationResView: [],
-                resBodyShow: false,
+                ImplementationResView: [],//所有的设备
+                resBodyShow: false,//主体内容是否大屏展示
                 resource: '',//当前设备
-                curPage: 1,
-                pagesize: 20,
-                currentPage: 1,
-                tableCount: 0,
-                tableData: [],
-                columnsData: {},
-                tableOffset: null,
-                Serachres: '',
-                changeModelFlag: false,
-                filterBox: false,
-                filterjs: {},
-                fuzzyFilter: ''
+                curPage: 1,//当前的页数
+                pagesize: 20,//表格一页展示多少条数据
+                currentPage: 1,//选择那一页数据
+                tableCount: 0,//表格的数据量
+                tableData: [],//表格内的数据
+                columnsData: {},//表格的列名
+                tableOffset: null,//表格的高度
+                Serachres: '',//搜索的内容
+                changeModelFlag: false,//是否点击了换模几乎
+                filterBox: false,//筛选的元素是否展开
+                filterjs: {},//筛选的条件
+                fuzzyFilter: ''//模糊筛选的内容
             }
         },
         computed: {
@@ -109,43 +93,58 @@
         },
         watch: {
             CurImplementationResGroup() {
-                this.GetResView();
                 this.Serachres = '';
                 this.filterjs = null;
                 this.changeModelFlag = false;
                 this.fuzzyFilter = '';
-                this.filterReset();
+                this.renderPage();
             },
         },
         mounted() {
-            let offsetTop = document.getElementById('table').offsetTop - 50 || document.body.scrollTop - 50;
-            let wrapH = document.getElementsByClassName('wrap')[0].clientHeight - 50;
-            this.tableOffset = wrapH - offsetTop - 32 - 60;
+            //计算表格的高度
+            let offsetTop = document.getElementById('table').offsetTop;
+            let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
+            this.tableOffset = wrapH - offsetTop;
             this.renderPage();
         },
         methods: {
             ...mapMutations(['ChangeCurImplementationResGroup']),
+            UpdatefilterBox(val){
+                //筛选框子组件向父组件传递是否隐藏
+                this.filterBox = val;
+            },
+            updateData(filterjs){
+                //根据子组件传来的筛选值更新数据
+                this.curPage = 1;
+                this.filterjs = filterjs;
+                this.ResWorkView();
+            },
             renderPage() {
+                //初始化页面
                 this.GetResView().then(() => {
-                    return this.ResWorkView(this.resource);
-                });
-                this.getTableColumn().then(res => {
-                    res.forEach(item => {
-                        let obj = {};
-                        for (let prop in item) {
-                            if (prop !== "type") {
-                                obj['key'] = prop;
-                                obj['value'] = item[prop];
-                            }
-                        }
-                        this.columnsData.push(obj);
-                    });
-                    return this.ResWorkView(this.$route.params.name)
+                    return this.getTableColumn().then(res=>{
+                            this.columnsData = [];
+                            res.forEach(item => {
+                                let obj = {};
+                                for (let prop in item) {
+                                    if (prop !== "type") {
+                                        obj['key'] = prop;
+                                        obj['value'] = item[prop];
+                                        setTimeout(function(){
+                                            console.log(5)
+                                        },0)
+                                    }
+                                }
+                                this.columnsData.push(obj);
+                            });
+                           return this.ResWorkView()
+                    })
                 });
             },
             GetResView(resName) {
+                //获取设备组下的所有的设备
                 return new Promise(resolve => {
-                    this.currentPage = 1;
+                    this.curPage = 1;
                     if (!this.CurImplementationResGroup) {
                         this.ChangeCurImplementationResGroup(this.$route.params.name);
                     }
@@ -162,21 +161,22 @@
                                 document.getElementsByClassName('active')[0].classList.remove('active');
                             }
                             this.resource = this.ImplementationResView[0].resName;
+                            resolve('');
                         }
-                        resolve('');
+
                     });
                 })
             },
-            ResWorkView(resource, pageSize, curPage, changeModel) {
+            ResWorkView(resName) {
                 return new Promise(resolve => {
                     this.$http({
                         url: 'ResWorkView',
                         data: {
-                            "PageSize": pageSize ? pageSize : "20",
-                            "CurPage": curPage ? curPage : "1",
-                            "Resource": resource,
+                            "PageSize": this.pagesize,
+                            "CurPage": this.curPage,
+                            "Resource": resName?resName:this.resource,
                             'GroupName': this.CurImplementationResGroup,
-                            'ChangeModel': changeModel ? changeModel : false,
+                            'ChangeModel': this.changeModelFlag,
                             'filter': this.filterjs ? JSON.stringify(this.filterjs) : null,
                             'fuzzyFilter': this.fuzzyFilter ? this.fuzzyFilter : "",
                         }
@@ -187,12 +187,11 @@
                         resolve(res);
                     });
                 });
-
             },
             getTableColumn() {
+                //获取表格的列
                 return new Promise(resolve => {
                     this.columnsData = [];
-                    //获取表格的列
                     this.$http({
                         url: "TableFiled",
                         data: {
@@ -201,14 +200,14 @@
                     }).then(res => {
                         resolve(res)
                     })
-                })
+                });
             },
-
-
             more() {
+                //展示更多
                 this.resBodyShow = this.resBodyShow ? false : true
             },
             resClick(e) {
+                //设备的点击事件
                 if (document.getElementsByClassName('active').length > 0) {
                     document.getElementsByClassName('active')[0].classList.remove('active');
                 }
@@ -218,37 +217,39 @@
                 this.resource = resource;
                 this.filterjs = null;
                 this.fuzzyFilter = '';
-                this.filterReset();
-                this.ResWorkView(resource);
+                this.ResWorkView();
                 this.tableData = [];
-                this.currentPage = 1;
+                this.curPage = 1;
             },
             handleCurrentChange: function (currentPage) {
-                this.currentPage = currentPage;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
+                //表格的页数发生改变
+                this.curPage = currentPage;
+                this.ResWorkView();
             },
             handleSizeChange: function (size) {
-                //table的页数发生改变触发事件
+                //表格一页展示的数据量发生改变
                 this.pagesize = size;
-                this.currentPage = 1;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
+                this.curPage = 1;
+                this.ResWorkView();
             },
 
             allRes() {
+                //所有设备的数据
                 this.pagesize = 20;
-                this.currentPage = 1;
+                this.curPage = 1;
                 this.resource = '';
                 this.changeModelFlag = false;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage);
+                this.ResWorkView();
             },
             SerachRes() {
+                //搜索设备
                 this.GetResView(this.Serachres);
             },
             ChangeModel() {
-                this.currentPage = 1;
+                this.curPage = 1;
                 this.pagesize = 20;
                 this.changeModelFlag = true;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
+                this.ResWorkView();
             },
             filterShow() {
                 //高级筛选的按钮的点击事件
@@ -258,35 +259,10 @@
                 //高级筛选框的关闭按钮
                 this.filterBox = false;
             },
-            filterReset() {
-                //高级筛选的重置按钮
-                let cRight = document.querySelectorAll('.cRight');
-                cRight.forEach(item => {
-                    item.children[0].value = ''
-                });
-                this.filterjs = null;
-                this.ResWorkView(this.resource);
-                this.closeFilter();
-            },
-            confirm() {
-                //高级筛选的确定按钮
-                let cRight = document.querySelectorAll('.cRight');
-                this.filterjs = {};
-                cRight.forEach(item => {
-                    let inputVal = item.children[0].value.trim();
-                    let inputAttr = item.children[0].attributes['data'].value;
-                    if (inputVal != '') {
-                        this.filterjs [inputAttr] = inputVal;
-                    }
-                });
-                this.currentPage = 1;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
-                this.closeFilter();
-            },
             fuzzyInp() {
                 //模糊筛选的input事件
-                this.currentPage = 1;
-                this.ResWorkView(this.resource, this.pagesize, this.currentPage, this.changeModelFlag);
+                this.curPage = 1;
+                this.ResWorkView();
             },
         }
     }
@@ -433,122 +409,6 @@
             .exportBtn {
                 margin-right: 12px;
                 float: right;
-            }
-
-            .filterBox {
-                display: none;
-                position: absolute;
-                left: 0;
-                top: 30px;
-                z-index: 10000;
-                height: 260px;
-                background-color: white;
-                border: 1px solid #808080;
-                width: 300px;
-                border-radius: 4px;
-
-                p {
-                    width: 100%;
-                    padding: 4px;
-                    color: #17a2b8;
-                    border-bottom: 1px solid #808080;
-                    font-size: 14px;
-                    -webkit-box-sizing: border-box;
-                    -moz-box-sizing: border-box;
-                    box-sizing: border-box;
-
-                    i {
-                        float: right;
-                    }
-                }
-
-                .conMain {
-                    height: 190px;
-                    overflow-x: hidden;
-                    overflow-y: scroll;
-
-                    .con {
-                        width: 100%;
-                        margin: 4px 0;
-
-                        .cLeft {
-                            width: 40%;
-                            float: left;
-                            padding: 4px;
-                            font-size: 12px;
-                            white-space: nowrap;
-                            box-sizing: border-box;
-                        }
-
-                        .cRight {
-                            float: right;
-                            width: 60%;
-                            box-sizing: border-box;
-                            padding: 0 4px;
-
-                            input {
-                                border: 1px solid #ced4da;
-                                border-radius: 4px;
-                                box-sizing: border-box;
-                                width: 100%;
-                                padding: 4px;
-                            }
-                        }
-                    }
-
-                    .con:after {
-                        display: block;
-                        content: '';
-                        clear: both;
-                    }
-                }
-
-                .conMain::-webkit-scrollbar {
-                    display: none;
-                }
-
-                .filterBtnGroup {
-                    background-color: white;
-                    position: absolute;
-                    bottom: 0;
-                    border-top: 1px solid #808080;
-                    width: 100%;
-                    padding: 4px 0;
-
-                    .btnCon {
-                        display: block;
-                        width: 50%;
-                        margin: 0 auto;
-
-                        .reset {
-                            color: #fff;
-                            background-color: #dc3545;
-                            border-color: #dc3545;
-                            outline: none;
-                            border: none;
-                            font-size: 12px;
-                            width: 50px;
-                            padding: 4px 0;
-                        }
-
-                        .confirm {
-                            color: #fff;
-                            background-color: #28a745;
-                            border-color: #28a745;
-                            outline: none;
-                            border: none;
-                            font-size: 12px;
-                            width: 50px;
-                            padding: 4px 0;
-                            float: right;
-                        }
-                    }
-
-                }
-            }
-
-            .show {
-                display: block;
             }
         }
     }

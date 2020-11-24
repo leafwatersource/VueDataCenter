@@ -23,7 +23,6 @@ var Fun = {
     },
     getCusDateTime(type) {
         var datetime = new Date();
-
         var year = datetime.getFullYear();
         var month = datetime.getMonth() + 1 > 9 ? datetime.getMonth() + 1 : '0' + (datetime.getMonth() + 1);
         var date = datetime.getDate();
