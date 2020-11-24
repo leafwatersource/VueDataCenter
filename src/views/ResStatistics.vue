@@ -48,7 +48,7 @@
                     </el-table>
                 </div>
             </div>
-            <div class="chart" id="chart" v-if="resStatisticsData.length!=='0'"></div>
+            <div class="chart" id="chart" v-if="resData.length!=='0'"></div>
             <div class="chart" v-else>
                 <span class="messageText">当前没有统计信息</span>
             </div>
@@ -111,84 +111,11 @@
                     return this.resGroupClickPromise(this.curResGroup);
                 }).then(res => {
                     res.resData = JSON.parse(res.resData);
-                    if (res.resData.length > 0) {
-                        this.echartsxAxis = [];
-                        this.resStatisticsData = [];
-                        this.resStatisticsData.push({
-                            name: '资源工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#CC0066',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        this.resStatisticsData.push({
-                            name: '任务工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#009999',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        this.resStatisticsData.push({
-                            name: '工时比例',
-                            type: 'line',
-                            data: [],
-                            yAxisIndex: 1,
-                            color: '#FFCC33',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        res.resData.forEach(item => {
-                            item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
-                            item['toDay'] = this.$Fun.foramateDate(item['toDay']);
-                            let column = item['fromDay'] + '/' + item['toDay'];
-                            this.echartsxAxis.push(column);
-                            this.resStatisticsData[0].data.push(item['resNeedHour']);
-                            this.resStatisticsData[1].data.push(item['resWorkHour']);
-                            this.resStatisticsData[2].data.push(item['hourRatio']);
-                        });
-                    }
+                    this.setEchartOptions(res);
                     if (this.resStatisticsData.length > 0) {
-                        console.log(this.curResGroup);
                         return this.initChart(this.curResGroup['ViewName']);
                     }
-
-                }).then(() => {
-                    console.log('请求完成');
-                })
+                });
             },
             GetResGroupPromise() {
                 return new Promise(resolve => {
@@ -316,7 +243,7 @@
                     series: this.resStatisticsData
                 };
                 // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
+                myChart.setOption(option, true);
                 window.onresize = function () {
                     myChart.resize();
                 }
@@ -338,74 +265,7 @@
                     this.echartsxAxis = [];
                     res.resData = JSON.parse(res.resData);
                     this.resStatisticsData = [];
-                    if (res.resData.length > 0) {
-                        this.resStatisticsData.push({
-                            name: '资源工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#CC0066',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        this.resStatisticsData.push({
-                            name: '任务工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#009999',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        this.resStatisticsData.push({
-                            name: '工时比例',
-                            type: 'line',
-                            data: [],
-                            yAxisIndex: 1,
-                            color: '#FFCC33',
-                            itemStyle: {
-                                normal: {
-                                    label: {
-                                        show: true, //开启显示
-                                        position: 'top', //在上方显示
-                                        textStyle: { //数值样式
-                                            color: 'black',
-                                            fontSize: 16
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        res.resData.forEach(item => {
-                            item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
-                            item['toDay'] = this.$Fun.foramateDate(item['toDay']);
-                            let column = item['fromDay'] + '/' + item['toDay'];
-                            this.echartsxAxis.push(column);
-                            this.resStatisticsData[0].data.push(item['resNeedHour']);
-                            this.resStatisticsData[1].data.push(item['resWorkHour']);
-                            this.resStatisticsData[2].data.push(item['hourRatio']);
-                        });
-                    }
+                    this.setEchartOptions(res);
                     if (this.resStatisticsData.length > 0) {
                         this.initChart(resGroupItem['ViewName']);
                     }
@@ -444,41 +304,79 @@
                     }
                 }).then(res => {
                     res.resData = JSON.parse(res.resData);
-                    if (res.resData.length > 0) {
-                        this.resStatisticsData.push({
-                            name: '资源工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#CC0066'
-                        });
-                        this.resStatisticsData.push({
-                            name: '任务工时',
-                            type: 'bar',
-                            data: [],
-                            yAxisIndex: 0,
-                            color: '#009999'
-                        });
-                        this.resStatisticsData.push({
-                            name: '工时比例',
-                            type: 'line',
-                            data: [],
-                            yAxisIndex: 1,
-                            color: '#FFCC33'
-                        });
-                        res.resData.forEach(item => {
-                            item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
-                            item['toDay'] = this.$Fun.foramateDate(item['toDay']);
-                            let column = item['fromDay'] + '/' + item['toDay'];
-                            this.echartsxAxis.push(column);
-                            this.resStatisticsData[0].data.push(item['resNeedHour']);
-                            this.resStatisticsData[1].data.push(item['resWorkHour']);
-                            this.resStatisticsData[2].data.push(item['hourRatio']);
-                        });
-                    }
-
+                    this.setEchartOptions(res);
                     this.initChart(this.CurResName);
                 })
+            },
+            setEchartOptions(echartData){
+                if (echartData.resData.length > 0) {
+                    this.resStatisticsData.push({
+                        name: '资源工时',
+                        type: 'bar',
+                        data: [],
+                        yAxisIndex: 0,
+                        color: '#CC0066',
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true, //开启显示
+                                    position: 'top', //在上方显示
+                                    textStyle: { //数值样式
+                                        color: 'black',
+                                        fontSize: 16
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    this.resStatisticsData.push({
+                        name: '任务工时',
+                        type: 'bar',
+                        data: [],
+                        yAxisIndex: 0,
+                        color: '#009999', itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true, //开启显示
+                                    position: 'top', //在上方显示
+                                    textStyle: { //数值样式
+                                        color: 'black',
+                                        fontSize: 16
+                                    }
+                                }
+                            }
+                        }
+
+                    });
+                    this.resStatisticsData.push({
+                        name: '工时比例',
+                        type: 'line',
+                        data: [],
+                        yAxisIndex: 1,
+                        color: '#FFCC33',
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true, //开启显示
+                                    position: 'top', //在上方显示
+                                    textStyle: { //数值样式
+                                        color: 'black',
+                                        fontSize: 16
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    echartData.resData.forEach(item => {
+                        item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
+                        item['toDay'] = this.$Fun.foramateDate(item['toDay']);
+                        let column = item['fromDay'] + '/' + item['toDay'];
+                        this.echartsxAxis.push(column);
+                        this.resStatisticsData[0].data.push(item['resNeedHour']);
+                        this.resStatisticsData[1].data.push(item['resWorkHour']);
+                        this.resStatisticsData[2].data.push(item['hourRatio']);
+                    });
+                }
             },
             GetResDetail() {
                 this.$http({
@@ -487,11 +385,9 @@
                         "resName": this.CurResName
                     }
                 }).then(res => {
-                    console.log(res)
                     res.resData = JSON.parse(res.resData);
                     this.resListData = [];
                     if (res.resData.length > 0) {
-                        res.resData = JSON.parse(res.resData);
                         res.resData.forEach(item => {
                             item['fromDay'] = this.$Fun.foramateDate(item['fromDay']);
                             item['toDay'] = this.$Fun.foramateDate(item['toDay']);
@@ -577,13 +473,11 @@
             .tableBox {
                 width: 40%;
                 height: 500px;
-                /*border: 1px solid black;*/
                 float: left;
 
                 #table {
                 }
             }
-
             .chart {
                 position: relative;
                 width: 60%;

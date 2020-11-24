@@ -9,9 +9,9 @@
             <span @click="HalfYearData">查询最近半年</span>
             <span @click="AllData" class="active">全部数据</span>
         </p>
-        <p>
-            <input type="text" placeholder="模糊查询">
-        </p>
+        <!--<p>-->
+            <!--<input type="text" placeholder="模糊查询">-->
+        <!--</p>-->
         <div id="table" style="margin-top: 15px;">
             <el-table
                     :data="tableData"
@@ -91,6 +91,7 @@
                 })
             },
             setTableHeight(){
+                //设置表格的高度
                 let offsetTop = document.getElementById('table').offsetTop;
                 let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
                 this.tableOffset = wrapH - offsetTop;

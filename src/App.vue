@@ -68,7 +68,7 @@
                                 <!--<el-menu-item index="/Statistics">设备负载</el-menu-item>-->
                                 <!--<el-menu-item index="/Statistics">生产达成</el-menu-item>-->
                                 <!--<el-menu-item index="/Statistics">订单生产进度</el-menu-item>-->
-                                <!--<el-menu-item index="/ResStatistics">产能分析</el-menu-item>-->
+                                <el-menu-item index="/ResStatistics">产能分析</el-menu-item>
                             </el-menu-item-group>
                         </el-submenu>
                     </el-menu>

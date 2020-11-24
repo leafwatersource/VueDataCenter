@@ -1,7 +1,7 @@
 <template>
     <div class="wrap" :class="{'WrapShow':!NavShow}" v-if="[v-cloak]">
 
-        <div class="inputBox">请输入设备名称 <input type="text" placeholder="请输入设备名称"></div>
+        <div class="inputBox">请输入设备名称 <input type="text" placeholder="请输入设备名称" ></div>
         <div class="top">
         <el-row :gutter="20">
             <el-col :xs="12" :sm="8" :md="4" :lg="4" :xl="4" v-for="item in resStatus"
@@ -40,7 +40,7 @@
                 <span v-if="Equipment!=null" v-text="'设备负载率:'+Equipment+'%'"></span>
                 <span v-if="ResFinishNum!=null" v-text="'设备达成率:'+ResFinishNum+'%'"></span>
                 <span v-if="curDayShift!=null" v-text="'curDayShift:'+curDayShift"></span>
-                <!--<span v-if="dayShift!=null" v-text="'dayShift:'+dayShift[0]['ResCalShift']"></span>-->
+                <!--<span  v-text="'dayShift:'+dayShift[0]['ResCalShift']"></span>-->
             </div>
         </div>
     </div>
@@ -147,6 +147,9 @@
     }
 </script>
 <style lang="scss" scoped>
+    .inputBox{
+
+    }
     .top {
         width: 100%;
         min-height: 0px;

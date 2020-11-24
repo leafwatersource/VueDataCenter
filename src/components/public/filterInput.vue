@@ -72,7 +72,6 @@
         }
     }
 </script>
-
 <style lang="scss" scoped>
     .filterWrap{
         display: inline-block;
@@ -101,7 +100,6 @@
             border: 1px solid #808080;
             width: 300px;
             border-radius: 4px;
-
             p {
                 width: 100%;
                 padding: 4px;
@@ -111,7 +109,6 @@
                 -webkit-box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 box-sizing: border-box;
-
                 i {
                     float: right;
                 }
@@ -185,7 +182,6 @@
                         width: 50px;
                         padding: 4px 0;
                     }
-
                     .confirm {
                         color: #fff;
                         background-color: #28a745;
@@ -206,7 +202,4 @@
             display: block;
         }
     }
-
-
-
 </style>
