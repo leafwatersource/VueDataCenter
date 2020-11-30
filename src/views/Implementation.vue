@@ -3,7 +3,14 @@
         <div class="resBox">
             <div class="resTitle">
                 <i class="fa fa-laptop"/>
-                <p v-text="'当前设备组:'+CurImplementationResGroup"/>
+                <!--<p v-text="'当前设备组:'+CurImplementationResGroup"/>-->
+                <p>
+                    <el-tag
+
+                            effect="plain">
+                        {{ CurImplementationResGroup }}
+                    </el-tag>
+                </p>
                 <input type="text" class="SerachRes" placeholder="请输入设备" @input="SerachRes" v-model="Serachres">
                 <div class="more" @click="more">展开</div>
             </div>
@@ -64,7 +71,7 @@
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
-    import filterInput from '../components/public/filterInput'
+    import filterInput from '../components/public/FilterInput'
     export default {
         components:{
             filterInput
@@ -130,9 +137,6 @@
                                     if (prop !== "type") {
                                         obj['key'] = prop;
                                         obj['value'] = item[prop];
-                                        setTimeout(function(){
-                                            console.log(5)
-                                        },0)
                                     }
                                 }
                                 this.columnsData.push(obj);

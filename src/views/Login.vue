@@ -39,7 +39,7 @@
         },
         methods: {
             hasLogin() {
-
+                //判断是否是登录了
                 return new Promise( (resolve, reject)=> {
                     if (this.EmpID == "") {
                         // 判断用户名是否为空
@@ -73,9 +73,9 @@
                         resolve(0);
                     }
                 });
-                // 登录按钮的点击事件
             },
             LoginClick() {
+                // 登录按钮的点击事件
                 this.hasLogin().then(res => {
                     if(res===0){
                         this.$http({
@@ -156,7 +156,6 @@
         width: 100%;
         height: 100%;
         background: linear-gradient(to right, #0052d4, #65c7f7, #9cecfb);
-
         .wrapBox {
             width: 60%;
             max-width: 1200px;
@@ -187,7 +186,6 @@
                 .inputBox {
                     padding: 8px 0;
                     width: 100%;
-
                     .title {
                         color: #212549;
                         font-size: 20px;

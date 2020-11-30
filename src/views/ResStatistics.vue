@@ -11,7 +11,7 @@
         </div>
         <div class="messageBox" v-else>产能分析没有数据</div>
 
-        <div class="echartBox" v-if="resData.length!='0'">
+        <div class="echartBox" v-if="resData.length!=='0'">
             <p v-if="curResGroup.ViewName " v-text="'设备组:'+curResGroup.ViewName"></p>
             <div class="tableBox">
                 <p>
@@ -35,10 +35,10 @@
                             height="500"
                             :cell-style="{padding:'0px'}"
                     >
-                        <template v-for="item in columnsData">
+                        <template v-for="(item,key) in columns">
                             <el-table-column
-                                    :key="item"
-                                    :prop="item"
+                                    :key="key"
+                                    :prop="key"
                                     :label="item"
                                     show-overflow-tooltip
                                     :min-width="120"
@@ -48,7 +48,7 @@
                     </el-table>
                 </div>
             </div>
-            <div class="chart" id="chart" v-if="resData.length!=='0'"></div>
+            <div class="chart" id="chart" v-if="echartsxAxis.length!=='0'"></div>
             <div class="chart" v-else>
                 <span class="messageText">当前没有统计信息</span>
             </div>
@@ -71,9 +71,9 @@
                 resListData: [],//设备的事件记录
                 resList: [],//所有的设备
                 curResGroup: '',//当前的设备组
-                columnsData: ['resName', 'fromDay', 'toDay', 'resNeedHour', 'resWorkHour', 'hourRatio', 'pmUID'],//表格的列名
                 options: [],//下拉框设备选项
-                CurResName: ''//当前的设备名称
+                CurResName: '',//当前的设备名称
+                columns:{},//表格的列名称
             }
         },
         computed: {
@@ -81,6 +81,7 @@
         },
         mounted() {
             this.renderPage();
+            this.GetColumns();
         },
         methods: {
             renderPage() {
@@ -116,6 +117,17 @@
                         return this.initChart(this.curResGroup['ViewName']);
                     }
                 });
+            },
+            GetColumns(){
+                this.$http({
+                    url:'TableFiled',
+                    data:{
+                        "tableName":"ResStatisticsTable"
+                    }
+                }).then(res=>{
+                    this.columns = res;
+                    console.log(res)
+                })
             },
             GetResGroupPromise() {
                 return new Promise(resolve => {

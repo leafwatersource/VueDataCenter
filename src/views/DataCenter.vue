@@ -51,7 +51,7 @@
 
 <script>
     import {mapState} from 'vuex'
-    import filterInput from '../components/public/filterInput'//精确筛选
+    import filterInput from '../components/public/FilterInput'//精确筛选
     import WorkNumMessage from '../components/DataCenter/WorkNumMessage'//展示工单信息的四个框
     export default {
         name: "Home",

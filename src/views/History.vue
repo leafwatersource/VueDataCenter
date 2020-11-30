@@ -95,11 +95,11 @@
                 let offsetTop = document.getElementById('table').offsetTop;
                 let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
                 this.tableOffset = wrapH - offsetTop;
-                window.onresize = ()=>{
-                    let offsetTop = document.getElementById('table').offsetTop;
-                    let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
-                    this.tableOffset = wrapH - offsetTop;
-                }
+                // window.onresize = ()=>{
+                //     offsetTop = document.getElementById('table').offsetTop;
+                //     let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
+                //     this.tableOffset = wrapH - offsetTop;
+                // }
             },
             getTableCounmns(){
                 //获取表格的列名
