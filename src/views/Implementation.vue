@@ -14,7 +14,7 @@
                 <input type="text" class="SerachRes" placeholder="请输入设备" @input="SerachRes" v-model="Serachres">
                 <div class="more" @click="more">展开</div>
             </div>
-            <div class="resBody" :class="{'resBodyShow':resBodyShow}">
+            <div class="resBody" :class="{'resBodyShow':resBodyShow,'resHide':!resBodyShow}">
                 <ul>
                     <li v-for="(item,index) in ImplementationResView" :class="{'active':index==0?true:false}"
                         :key="item.resName" v-text="item.resName" @click="resClick"/>
@@ -27,7 +27,7 @@
             <p class="all" @click="allRes">所有设备</p>
             <span v-if="resource" v-text="'&gt; '+resource"/>
             <span v-text="'&gt; 换模计划'" v-if="changeModelFlag"></span>
-            <span style="position: absolute;right: 15px;" @click="ChangeModel">换模计划</span>
+            <span style="position: absolute;right: 7px;" @click="ChangeModel">换模计划</span>
         </div>
         <div id="table">
             <button class="exportBtn">导出数据</button>
@@ -40,7 +40,7 @@
                     ref="filterTable"
                     :fit="true"
                     :default-sort="{prop: 'date', order: 'descending'}"
-                    style="width: 100%"
+                    style="width: 100%;min-height:500px;"
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
             >
@@ -111,7 +111,7 @@
             //计算表格的高度
             let offsetTop = document.getElementById('table').offsetTop;
             let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
-            this.tableOffset = wrapH - offsetTop;
+            this.tableOffset = wrapH - offsetTop-50;
             this.renderPage();
         },
         methods: {
@@ -268,6 +268,7 @@
                 this.curPage = 1;
                 this.ResWorkView();
             },
+
         }
     }
 </script>
@@ -325,7 +326,8 @@
 
             .resBody {
                 padding: 8px 0;
-                height: 66px;
+               min-height: 0px;
+
                 overflow: hidden;
                 -webkit-transition: all 1s;
                 -moz-transition: all 1s;
@@ -351,7 +353,9 @@
                     }
                 }
             }
-
+            .resHide{
+                max-height: 60px;
+            }
             .resBodyShow {
                 height: auto;
                 overflow: inherit;
@@ -359,6 +363,7 @@
         }
 
         .CurResDetail {
+            position: relative;
             height: 30px;
             background-color: #e2e3e5;
             width: 100%;

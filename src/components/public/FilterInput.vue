@@ -25,8 +25,6 @@
     export default {
         name: "filterInput",
         props: ['columnsJson', 'filterBox'],
-        // filterBox: false,精确筛选框是否展示
-        // columnsJson: {},//表格的列名(用于精确筛选)
         data() {
             return {
                 filterjs: null,//精确筛选的对象

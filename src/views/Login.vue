@@ -159,7 +159,7 @@
         .wrapBox {
             width: 60%;
             max-width: 1200px;
-            height: 300px;
+            height: 18.75rem;
             position: absolute;
             left: 50%;
             top: 50%;
@@ -188,23 +188,22 @@
                     width: 100%;
                     .title {
                         color: #212549;
-                        font-size: 20px;
-                        letter-spacing: 2px;
+                        font-size: 1.25rem;
+                        letter-spacing: 0.125rem;
                         text-align: center;
-                        margin-bottom: 12px;
+                        margin-bottom: 0.75rem;
                         font-weight: 500;
                     }
-
                     input,
                     button,
                     .errorBox {
                         width: 90%;
                         display: block;
-                        margin: 5px auto;
-                        height: 40px;
-                        border-radius: 4px;
+                        margin: 0.3125rem auto;
+                        height: 2.5rem;
+                        border-radius: 0.25rem;
                         outline: none;
-                        font-size: 14px;
+                        font-size: 0.875rem;
                     }
 
                     input {
@@ -215,7 +214,7 @@
                         margin: 0 auto;
                         text-align: right;
                         color: red;
-                        font-size: 12px;
+                        font-size: 0.75rem;
                     }
 
                     input {

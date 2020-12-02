@@ -42,12 +42,6 @@
             </el-row>
 
             <Tabs :dayShiftList="dayShift"/>
-            <!--<div class="ChartBox">功能即将上线Loading...-->
-            <!--<span v-if="Equipment!=null" v-text="'设备负载率:'+Equipment+'%'"></span>-->
-            <!--<span v-if="ResFinishNum!=null" v-text="'设备达成率:'+ResFinishNum+'%'"></span>-->
-            <!--<span v-if="curDayShift!=null" v-text="'curDayShift:'+curDayShift"></span>-->
-            <!--&lt;!&ndash;<span  v-text="'dayShift:'+dayShift[0]['ResCalShift']"></span>&ndash;&gt;-->
-            <!--</div>-->
         </div>
     </div>
 </template>
@@ -156,7 +150,6 @@
                             'empid': this.$cookie.get('empID')
                         }
                     }).then(res => {
-                        console.log(res);
                         resolve(res);
                     })
                 })
@@ -181,6 +174,7 @@
                     return this.GetProductFinish();
                 }).then(() => {
                     this.GetDataShift();
+                    this.GetResEventData();
                 })
 
             },
@@ -193,6 +187,18 @@
                     }
                 }).then(res => this.ResFinishNum = res);
             },
+            GetResEventData(){
+                //获取事件记录
+                console.log('获取事件记录');//默认获取一整天的事件记录
+                this.$http({
+                    url:"GetResEventData",
+                    data:{
+                        "ResName":this.resource
+                    }
+                }).then(res=>{
+                    console.log(res);
+                })
+            }
         }
     }
 </script>
@@ -251,7 +257,6 @@
     .main {
         .ChartBox {
             width: 100%;
-            /*height: 380px;*/
         }
 
     }

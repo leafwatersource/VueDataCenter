@@ -226,7 +226,7 @@
                         right: 15px;
                         top: 50px;
                         background-color: #212529;
-                        font-size: 14px;
+                        font-size: .6rem;
                         display: none;
                         height: 0;
 
@@ -310,7 +310,7 @@
     @media screen and (max-width: 767px) {
         #top {
             .Me, .message {
-                font-size: 14px;
+                font-size: .4rem;
             }
 
             .menu {

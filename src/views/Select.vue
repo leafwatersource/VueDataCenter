@@ -131,10 +131,11 @@
             }
 
             .title {
-                font-size: 18px;
+                font-size: 1.125rem;
                 font-weight: 400;
                 text-align: center;
             }
+
 
             .AuthorityBox {
                 display: flex;

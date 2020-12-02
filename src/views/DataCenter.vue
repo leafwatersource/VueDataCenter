@@ -21,10 +21,27 @@
                     style="width: 100%;min-height:500px;"
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
+                    @row-click="rowClick"
             >
 
                 <template v-for="item in columnsData">
+                    <el-table-column v-if="item==='生产状态'" :key="item"
+                                     :prop="item"
+                                     :label="item"
+                                     sortable
+                                     show-overflow-tooltip
+                                     :min-width="120"
+                                     align="center"
+                    >
+                        <template slot-scope="scope">
+                            <i class="el-icon-video-play" v-if="scope.row['生产状态']=='0'||!scope.row['生产状态']" style="color: red;font-size: 1rem"></i>
+                            <i class="el-icon-video-pause" v-else-if="scope.row['生产状态']=='1'" style="color: green;font-size: 1rem"></i>
+                            <i class="el-icon-circle-check" v-else style="color: orange;font-size: 1rem"></i>
+                            {{scope.row['生产状态']=='0'||!scope.row['生产状态']?'未生产':(scope.row['生产状态']=='1'?'生产中':'已完成')}}
+                        </template>
+                    </el-table-column>
                     <el-table-column
+                            v-else
                             :key="item"
                             :prop="item"
                             :label="item"
@@ -104,6 +121,22 @@
             this.tableOffset = wrapH - offsetTop;
         },
         methods: {
+            rowClick(row,){
+              //表格内所有的行的点击事件,g根据工单号码获取工单下的所有的工序的进度
+              const workid = row['工单号码'];
+              this.getOpdata(workid);
+            },
+            getOpdata(workid){
+                //根据工单号码搜索工单下所有的工序的进度
+                this.$http({
+                    url:'GetAllOP',
+                    data:{
+                        "workID":workid
+                    }
+                }).then(res=>{
+                    console.log(res);
+                });
+            },
             WorkType(data){
                 //子组件修改父组件的工单类型
                 this.changeWorkType(...data)
@@ -230,7 +263,8 @@
                 this.workItemType.type = type;
                 this.currentPage = 1;
                 this.getDataCenter();
-            }
+            },
+
         }
     }
 </script>
@@ -262,10 +296,34 @@
             text-align: left;
         }
         //表格的样式
+        .el-table /deep/ .warning-row {
+            //生产完成
+            background-color: #ffdfa4;
+            color: black;
+        }
+        .el-table /deep/ .error-row {
+            //未生产
+            background-color: #ffdede;
+            color: black;
+        }
+        .el-table /deep/ .success-row {
+            //正在生产
+              background-color: #b0f7b3;
+            color: black;
+          }
         #table {
             position: relative;
             margin-top: 15px;
-
+            /deep/ {
+                .el-table--enable-row-hover {
+                    .el-table__body tr {
+                        &:hover {
+                            /*background-color: black !important;*/
+                            /*color: white;*/
+                        }
+                    }
+                }
+            }
             .exportBtn {
                 padding: 6px;
                 font-size: 12px;

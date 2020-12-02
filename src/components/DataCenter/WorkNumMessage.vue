@@ -42,15 +42,15 @@
 <style scoped lang="scss">
     //工单的统计信息的框
     .flexItem{
-        padding: 8px;
-        -webkit-border-radius: 8px;
-        -moz-border-radius: 8px;
-        border-radius: 8px;
+        padding: 0.5rem;
+        -webkit-border-radius: 0.5rem;
+        -moz-border-radius: 0.5rem;
+        border-radius: 0.5rem;
         cursor: pointer;
-        margin: 20px 0;
+        margin: 1.25rem 0;
         .card-header {
             color: white;
-            font-size: 14px;
+            font-size: 0.875rem;
         }
         h2 {
             color: white;

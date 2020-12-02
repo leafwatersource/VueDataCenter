@@ -24,6 +24,10 @@
                         </el-option>
                     </el-select>
                 </p>
+                <div class="chart" id="chart" v-if="echartsxAxis.length!=='0'"></div>
+                <div class="chart" v-else>
+                    <span class="messageText">当前没有统计信息</span>
+                </div>
                 <div id="table">
                     <el-table
                             :data="resListData"
@@ -47,10 +51,6 @@
                         </template>
                     </el-table>
                 </div>
-            </div>
-            <div class="chart" id="chart" v-if="echartsxAxis.length!=='0'"></div>
-            <div class="chart" v-else>
-                <span class="messageText">当前没有统计信息</span>
             </div>
         </div>
     </div>
@@ -149,7 +149,7 @@
                             "viewId": resGroup.ViewID
                         }
                     }).then(res => {
-                        resolve(res)
+                        resolve(res);
 
                     })
                 });
@@ -160,7 +160,6 @@
                     this.curResGroup = resGroupItem;
                     //设备的统计信息
                     this.GetResList(resGroupItem);
-
                     this.CurResName = '';
                     this.$http({
                         url: 'GetResStatistics',
@@ -278,10 +277,7 @@
                     res.resData = JSON.parse(res.resData);
                     this.resStatisticsData = [];
                     this.setEchartOptions(res);
-                    if (this.resStatisticsData.length > 0) {
                         this.initChart(resGroupItem['ViewName']);
-                    }
-
                 })
             },
             GetResGroupTable() {
@@ -335,7 +331,7 @@
                                     position: 'top', //在上方显示
                                     textStyle: { //数值样式
                                         color: 'black',
-                                        fontSize: 16
+                                        fontSize: 12
                                     }
                                 }
                             }
@@ -353,7 +349,7 @@
                                     position: 'top', //在上方显示
                                     textStyle: { //数值样式
                                         color: 'black',
-                                        fontSize: 16
+                                        fontSize: 12
                                     }
                                 }
                             }
@@ -369,7 +365,7 @@
                         itemStyle: {
                             normal: {
                                 label: {
-                                    show: true, //开启显示
+                                    show: false, //开启显示
                                     position: 'top', //在上方显示
                                     textStyle: { //数值样式
                                         color: 'black',
@@ -388,6 +384,8 @@
                         this.resStatisticsData[1].data.push(item['resWorkHour']);
                         this.resStatisticsData[2].data.push(item['hourRatio']);
                     });
+                }else{
+                    this.resStatisticsData=[];
                 }
             },
             GetResDetail() {
@@ -483,18 +481,18 @@
 
         .echartBox {
             .tableBox {
-                width: 40%;
-                height: 500px;
-                float: left;
+                width: 100%;
+                /*height: 500px;*/
+                /*float: left;*/
 
                 #table {
                 }
             }
             .chart {
                 position: relative;
-                width: 60%;
+                width: 100%;
                 height: 500px;
-                float: right;
+                /*float: right;*/
 
                 .messageText {
                     position: absolute;
