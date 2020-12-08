@@ -49,5 +49,30 @@ var Fun = {
         }
         return year + '-' + month + '-' + date + ' 00:00';
     },
+     Deduplication(Arr){
+        //数组去重
+         let newArr = [];
+         let obj = {};
+         for (let i = 0; i <Arr.length ; i++) {
+             if(!obj[Arr[i]]){
+                 obj[Arr[i]] = true;
+                 newArr.push(Arr[i])
+             }
+         }
+         return newArr;
+     },
+    sortData(data,way){
+        //时间字符串的排序
+        if(way === "order"){
+            return data.sort(function(a,b) {
+                //这里的time要根据本身的数据来，后面的正则匹配也要根据自己数据来
+                return Date.parse(a.replace(/-/g,"/"))-Date.parse(b.replace(/-/g,"/"));
+            });
+        }else if(way === "back"){
+            return data.sort(function(a,b) {
+                return Date.parse(b.replace(/-/g,"/"))-Date.parse(a.replace(/-/g,"/"));
+            });
+        }
+    }
 };
 export default Fun;

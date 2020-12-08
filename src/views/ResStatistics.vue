@@ -28,7 +28,7 @@
                 <div class="chart" v-else>
                     <span class="messageText">当前没有统计信息</span>
                 </div>
-                <div id="table">
+                <div id="table" v-show="resListData.length!=='0'">
                     <el-table
                             :data="resListData"
                             border

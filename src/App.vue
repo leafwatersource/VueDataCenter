@@ -109,14 +109,16 @@
             this.fetchData()
         },
         watch: {
-            $route(to) {
-                if (to.path != '#/Select' && to.path != '#/' && to.path != '/') {
+            $route() {
+                let path = window.location.hash;
+                if (path !== '#/Select' && path !== '#/') {
                     this.GetImplementationData();
                 }
             }
         },
         mounted() {
-            if (window.location.hash != '#/Select' && window.location.hash != '#/' && window.location.hash != '/') {
+            let path = window.location.hash;
+            if (path !== '#/Select' && path !== '#/') {
                 this.GetImplementationData();
             }
         }

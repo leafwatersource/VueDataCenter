@@ -62,7 +62,14 @@
                 this.$http({
                     url: 'FunctionList',
                 }).then(funList => {
-                    this.funList.push(...funList);
+                    if (Object.keys(funList).length>0) {
+                        for (var item in funList) {
+                            if (funList[item].toUpperCase() === "ADMIN") {
+                                this.funList.push('datacenter');
+                            }
+                        }
+                    }
+                    // this.funList.push(...funList);
                 });
             },
             datacenterClick() {
@@ -102,8 +109,6 @@
                 // }
                 this.clickText = '计划看板';
                 this.messageShow = true;
-
-
             }
         }
     };

@@ -6,7 +6,6 @@
                 <!--<p v-text="'当前设备组:'+CurImplementationResGroup"/>-->
                 <p>
                     <el-tag
-
                             effect="plain">
                         {{ CurImplementationResGroup }}
                     </el-tag>
@@ -51,7 +50,7 @@
                             :label="item.value"
                             sortable
                             show-overflow-tooltip
-                            :min-width="120"
+                            :min-width="100"
                             align="center"
                     />
                 </template>

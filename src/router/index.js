@@ -5,14 +5,12 @@ import DataCenter from '../views/DataCenter.vue'
 import History from '../views/History.vue'
 import Implementation from '../views/Implementation.vue'
 import Select from '../views/Select.vue'
-import NotFound from '../views/NotFound.vue'
-import Error from '../views/Error'
 import Statistics from '../views/Statistics'
 import ResStatistics from '../views/ResStatistics'
 Vue.use(VueRouter);
 
 const routes = [{
-        path: '/',
+        path: '*',
         name: 'Login',
         meta: { navShow: false,title:'用户登录' },
         component: Login,
@@ -65,16 +63,6 @@ const routes = [{
         meta:{
             title:'设备统计'
         }
-    },
-    {
-        path:'/Error',
-        name:'Error',
-        component:Error
-    },
-    {
-        path: '*',
-        name: 'NotFound',
-        component: NotFound
     }
 
 ];
@@ -84,10 +72,10 @@ const router = new VueRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
-    // if (to.name !== 'Login' && !store.state.LoginStatus) next({ name: 'Login' })
-    // else next()
-    next()
-});
+// router.beforeEach((to, from, next) => {
+//     // if (to.name !== 'Login' && !store.state.LoginStatus) next({ name: 'Login' })
+//     // else next()
+//     next()
+// });
 
 export default router

@@ -11,9 +11,7 @@
                 <div class="inputBox">
                     <p class="title" v-text="'用户登陆'"></p>
                     <input type="text" placeholder="用户名" v-model="EmpID"/>
-                    <form>
-                        <input type="password" placeholder="密码" v-model="UserPass"/>
-                    </form>
+                        <input type="password" placeholder="密码" v-model="UserPass" @keyup.13="handleEvent($event)" />
                     <button @click="LoginClick" v-text="'登陆'" v-if="LoginState"></button>
                     <div class="fouceOut" v-else>
                         <button v-text="'强制登录'" @click="LogOut"></button>
@@ -35,9 +33,23 @@
                 LoginState: true//登录状态
             };
         },
-        mounted() {
-        },
         methods: {
+            handleEvent(e){
+                //esc键抬起事件
+                if(e.keyCode==27){
+                    if(!this.LoginState){
+                        this.cancel();
+                    }
+                }
+                //确定键抬起事件
+                if(e.keyCode == 13){
+                    if(this.LoginState){
+                        this.LoginClick();
+                    }else{
+                        this.LogOut();
+                    }
+                }
+            },
             hasLogin() {
                 //判断是否是登录了
                 return new Promise( (resolve, reject)=> {
@@ -133,7 +145,7 @@
                     this.$store.state.UserMessage = res[0];
                     this.$cookie.set("empName", res[0].empName, 1);
                     this.$cookie.set("sysID", res[0].sysID, 1);
-                    this.$router.push("/Select");
+                    this.$router.push('Select')
                 })
             },
             cancel() {

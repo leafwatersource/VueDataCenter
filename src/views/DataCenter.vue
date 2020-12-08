@@ -21,7 +21,7 @@
                     style="width: 100%;min-height:500px;"
                     :cell-style="{padding:'0px'}"
                     :height="tableOffset"
-                    @row-click="rowClick"
+                    @row-dblclick="rowClick"
             >
 
                 <template v-for="item in columnsData">
@@ -34,9 +34,9 @@
                                      align="center"
                     >
                         <template slot-scope="scope">
-                            <i class="el-icon-video-play" v-if="scope.row['生产状态']=='0'||!scope.row['生产状态']" style="color: red;font-size: 1rem"></i>
-                            <i class="el-icon-video-pause" v-else-if="scope.row['生产状态']=='1'" style="color: green;font-size: 1rem"></i>
-                            <i class="el-icon-circle-check" v-else style="color: orange;font-size: 1rem"></i>
+                            <i class="el-icon-video-play" v-if="scope.row['生产状态']=='0'||!scope.row['生产状态']" style="color: red;font-size: 1rem;font-weight: bolder"></i>
+                            <i class="el-icon-video-pause" v-else-if="scope.row['生产状态']=='1'" style="color: green;font-size: 1rem;font-weight: bolder"></i>
+                            <i class="el-icon-circle-check" v-else style="color: orange;font-size: 1rem;font-weight: bolder"></i>
                             {{scope.row['生产状态']=='0'||!scope.row['生产状态']?'未生产':(scope.row['生产状态']=='1'?'生产中':'已完成')}}
                         </template>
                     </el-table-column>
@@ -62,6 +62,7 @@
                     :page-size="pagesize"
                     :total="tableCount">
             </el-pagination>
+            <GanteWrap :drawer="GanteWrapFlag" @GanTeClose="GanTeClose" :OpMessage="OpMessage" :SelectWorkItem="SelectWorkItem"></GanteWrap>
         </div>
     </div>
 </template>
@@ -70,11 +71,13 @@
     import {mapState} from 'vuex'
     import filterInput from '../components/public/FilterInput'//精确筛选
     import WorkNumMessage from '../components/DataCenter/WorkNumMessage'//展示工单信息的四个框
+    import GanteWrap from '../components/DataCenter/GanTeDrawer' //展示甘特图的模态框
     export default {
         name: "Home",
         components:{
             filterInput,
-            WorkNumMessage
+            WorkNumMessage,
+            GanteWrap
         },
         data() {
             return {
@@ -108,6 +111,9 @@
                 filterBox: false,//是否显示精确筛选的框
                 fuzzyFilter: '',//模糊筛选
                 filterjs: null,//精确筛选的对象
+                GanteWrapFlag:false,//甘特图的模态框是否显示
+                OpMessage:null,//按工单搜索出来的所有工序的信息
+                SelectWorkItem:null,//双击后选择的工单信息
             }
         },
         computed: {
@@ -121,10 +127,16 @@
             this.tableOffset = wrapH - offsetTop;
         },
         methods: {
+            GanTeClose(arg){
+                //甘特图抽屉的关闭事件
+                this.GanteWrapFlag = arg;
+            },
             rowClick(row,){
-              //表格内所有的行的点击事件,g根据工单号码获取工单下的所有的工序的进度
+              //表格内所有的行的双击事件,根据工单号码获取工单下的所有的工序的进度
               const workid = row['工单号码'];
               this.getOpdata(workid);
+              this.GanteWrapFlag = true;
+              this.SelectWorkItem = row;
             },
             getOpdata(workid){
                 //根据工单号码搜索工单下所有的工序的进度
@@ -134,7 +146,7 @@
                         "workID":workid
                     }
                 }).then(res=>{
-                    console.log(res);
+                    this.OpMessage = res;
                 });
             },
             WorkType(data){
@@ -314,16 +326,6 @@
         #table {
             position: relative;
             margin-top: 15px;
-            /deep/ {
-                .el-table--enable-row-hover {
-                    .el-table__body tr {
-                        &:hover {
-                            /*background-color: black !important;*/
-                            /*color: white;*/
-                        }
-                    }
-                }
-            }
             .exportBtn {
                 padding: 6px;
                 font-size: 12px;
