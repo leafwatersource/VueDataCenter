@@ -40,7 +40,6 @@
     if(Object.keys(this.resMessage).length>0){
     for (let [key,value] of Object.entries(this.resMessage) ) {
      if (value!==null && typeof value =="object") {
-
       for(let [itemKey,itemValue] of Object.entries(value)){
         if(this.AttrMessageZh['resorderbean']) {
          this.resMessageData[this.AttrMessageZh['resorderbean'][itemKey]] = itemValue.toString();

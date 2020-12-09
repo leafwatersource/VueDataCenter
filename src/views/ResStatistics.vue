@@ -73,7 +73,7 @@
                 curResGroup: '',//当前的设备组
                 options: [],//下拉框设备选项
                 CurResName: '',//当前的设备名称
-                columns:{},//表格的列名称
+                columns: {},//表格的列名称
             }
         },
         computed: {
@@ -118,13 +118,13 @@
                     }
                 });
             },
-            GetColumns(){
+            GetColumns() {
                 this.$http({
-                    url:'TableFiled',
-                    data:{
-                        "tableName":"ResStatisticsTable"
+                    url: 'TableFiled',
+                    data: {
+                        "tableName": "ResStatisticsTable"
                     }
-                }).then(res=>{
+                }).then(res => {
                     this.columns = res;
                     console.log(res)
                 })
@@ -277,7 +277,7 @@
                     res.resData = JSON.parse(res.resData);
                     this.resStatisticsData = [];
                     this.setEchartOptions(res);
-                        this.initChart(resGroupItem['ViewName']);
+                    this.initChart(resGroupItem['ViewName']);
                 })
             },
             GetResGroupTable() {
@@ -316,7 +316,7 @@
                     this.initChart(this.CurResName);
                 })
             },
-            setEchartOptions(echartData){
+            setEchartOptions(echartData) {
                 if (echartData.resData.length > 0) {
                     this.resStatisticsData.push({
                         name: '资源工时',
@@ -384,8 +384,8 @@
                         this.resStatisticsData[1].data.push(item['resWorkHour']);
                         this.resStatisticsData[2].data.push(item['hourRatio']);
                     });
-                }else{
-                    this.resStatisticsData=[];
+                } else {
+                    this.resStatisticsData = [];
                 }
             },
             GetResDetail() {
@@ -488,6 +488,7 @@
                 #table {
                 }
             }
+
             .chart {
                 position: relative;
                 width: 100%;
@@ -513,6 +514,5 @@
             content: '';
             clear: both;
         }
-
     }
 </style>

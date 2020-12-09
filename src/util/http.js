@@ -4,8 +4,9 @@ import qs from 'qs'
 import cookie from 'vue-cookie'
 // var api = 'https://localhost:44309/';//本地调试的api
 // var api = 'http://tenglongapi.szratetec.cn/';//腾龙的api
-// var api = 'http://woodfastapi.szratetec.cn/';//沃富特的api
-var api = 'http://beiteapi.szratetec.cn/';//贝特的api
+var api = 'http://woodfastapi.szratetec.cn/';//沃富特的api
+// var api = 'http://beiteapi.szratetec.cn/';//贝特的api
+// var api = 'https://localhost:5001';//贝特的api
 const http = options => {
     return new Promise((resolve, reject) => {
         const defaultOptions = {};

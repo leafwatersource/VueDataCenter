@@ -14,12 +14,16 @@
                 <span>正在生产</span>
             </div>
         </div>
-        <Gante :OpMessage="OpMessage"></Gante>
+        <Gante :OpMessage="OpMessage" @updateGanttPosition="updateGanttPosition" @updateOpMessage="updateOpMessage"></Gante>
+        <div class="Ganttmode">
+           <span>实际开始&nbsp;/&nbsp;实际结束:{{opMessage['startDateTime']+' / '+opMessage['endDateTime']}}</span>
+            <span>已完成&nbsp;/&nbsp;正在生产:{{opMessage['finishedQty']+' / '+opMessage['unFinishQty']}}</span>
+        </div>
     </el-drawer>
 </template>
 
 <script>
-    import Gante from './GanTe'
+    import Gante from './Gantt'
     export default {
         name: "GanTeDrawer",
         props:['drawer','OpMessage','SelectWorkItem'],
@@ -28,12 +32,25 @@
         },
         data() {
             return {
-                direction: 'ttb',
+                direction: 'ttb',//模态框展示的方向
+                opMessage:{},//鼠标移上的时候工序的信息
             };
         },
         updated(){
         },
         methods: {
+            updateOpMessage(data){
+                this.opMessage = data;
+            },
+            updateGanttPosition(positionMessage){
+                //更新鼠标hover时候信息块的位置
+                let Ganttmode = document.getElementsByClassName('Ganttmode')[0];
+                Ganttmode.style.left = positionMessage.left+'px';
+                Ganttmode.style.top = positionMessage.top+'px';
+                if (Ganttmode.style.display !== positionMessage.display) {
+                    Ganttmode.style.display = positionMessage.display;
+                }
+            },
             handleClose() {
                     //抽屉关闭的事件
                 this.$emit('GanTeClose',false)
@@ -95,5 +112,22 @@
         display: block;
         content: '';
         clear: both;
+    }
+    .Ganttmode{
+        padding: 15px;
+        width: 260px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: none;
+        background-color: rgba(0,0,0,.4);
+        transition: all .2s linear;
+        border-radius: 4px;
+    }
+    .Ganttmode span{
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        display: block;
     }
 </style>

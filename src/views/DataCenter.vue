@@ -71,7 +71,7 @@
     import {mapState} from 'vuex'
     import filterInput from '../components/public/FilterInput'//精确筛选
     import WorkNumMessage from '../components/DataCenter/WorkNumMessage'//展示工单信息的四个框
-    import GanteWrap from '../components/DataCenter/GanTeDrawer' //展示甘特图的模态框
+    import GanteWrap from '../components/DataCenter/GanttDrawer' //展示甘特图的模态框
     export default {
         name: "Home",
         components:{
