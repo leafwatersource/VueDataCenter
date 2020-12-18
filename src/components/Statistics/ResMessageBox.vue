@@ -48,7 +48,6 @@
      }else{
       if (value!==null) {
        this.resMessageData[this.AttrMessageZh[key]] = value.toString();
-
       }
      }
     }

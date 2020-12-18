@@ -32,7 +32,7 @@
         },
         data() {
             return {
-                direction: 'ttb',//模态框展示的方向
+                direction: 'rtl',//模态框展示的方向
                 opMessage:{},//鼠标移上的时候工序的信息
             };
         },
@@ -119,6 +119,11 @@
         position: absolute;
         left: 0;
         top: 0;
+        -webkit-transform: translateX(50%);
+        -moz-transform: translateX(50%);
+        -ms-transform: translateX(50%);
+        -o-transform: translateX(50%);
+        transform: translateX(50%);
         display: none;
         background-color: rgba(0,0,0,.4);
         transition: all .2s linear;

@@ -33,6 +33,11 @@
                 LoginState: true//登录状态
             };
         },
+        mounted(){
+            this.$http({
+                url:'ExportTest'
+            });
+        },
         methods: {
             handleEvent(e){
                 //esc键抬起事件

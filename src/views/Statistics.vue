@@ -31,7 +31,6 @@
                                 {{ curRes.resname }}
                             </el-tag>
                             <ResMessageBox :drawer="drawer" :resMessage="curRes" :AttrMessageZh="AttrMessageZh" @closeDrawer="closeDrawer"></ResMessageBox>
-
                     </div>
                 </el-col>
                 <el-col :xs="4" :sm="6" :md="8" :lg="9" :xl="2">
@@ -253,12 +252,10 @@
     .top::-webkit-scrollbar {
         display: none; /* Chrome Safari */
     }
-
     .main {
         .ChartBox {
             width: 100%;
         }
-
     }
     #resHover,#resProductHover{
             li{
@@ -267,7 +264,3 @@
             }
     }
 </style>
-
-
-
-

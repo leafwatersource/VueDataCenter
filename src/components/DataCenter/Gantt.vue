@@ -43,6 +43,7 @@
         },
         watch: {
             OpMessage() {
+                console.log(this.OpMessage);
                 this.getTimerData().then(() => {
                     this.getPlanLine();
                 })
@@ -54,7 +55,7 @@
         methods: {
             moveEvent(e){
                 let option = {
-                    left:e.pageX-100,
+                    left:e.pageX-e.path[7].offsetLeft-e.path[4].offsetLeft-e.offsetX,
                     top:e.pageY+10-30-43.64,
                     display:'block'
                 };
@@ -140,27 +141,6 @@
                     this.PlanLine.push(obj)
                 }
             },
-            hoverEvent() {
-                let plan = document.getElementsByClassName("plan");
-                for(let i =0;i<plan.length;i++){
-                    plan[i].onmousemove = (e)=>{
-                        let option = {
-                            left:e.pageX-100,
-                            top:e.pageY+10-30-43.64,
-                            display:'block'
-                        };
-                        this.$emit("updateGanttPosition",option);
-                    };
-                    plan[i].onmouseleave =()=>{
-                        let option = {
-                            left:0,
-                            top:0,
-                            display:'none'
-                        };
-                        this.$emit("updateGanttPosition",option);
-                    }
-                }
-            }
         }
     }
 </script>
@@ -168,11 +148,12 @@
 <style scoped>
     #Content {
         width: 100%;
-        height: 300px;
+        /*height: 300px;*/
         max-width: 1080px;
         position: absolute;
         left: 50%;
         top: 50%;
+        max-height: calc(100% - 30px);
         transform: translate(-50%, -50%);
     }
 
@@ -193,7 +174,7 @@
     #Content .OpWrap {
         float: left;
         border-right: 1px solid red;
-        height: 300px;
+        /*height: 300px;*/
         overflow-y: scroll;
     }
 
@@ -255,9 +236,9 @@
     .MessageWrap {
         position: relative;
         float: right;
+        left: 0;
         width: calc(100% - 83px);
         overflow: hidden;
-        height: 300px;
     }
 
     .MessageWrap::after {
@@ -267,10 +248,9 @@
     }
 
     .Message {
-        position: absolute;
-        left: 0;
-        top: 0;
         width: 1080px;
+        position: relative;
+        left: 0;
         list-style: none;
     }
 

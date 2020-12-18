@@ -25,7 +25,7 @@
             >
 
                 <template v-for="item in columnsData">
-                    <el-table-column v-if="item==='生产状态'" :key="item"
+                    <el-table-column v-if="item==='生产状态'" :key="item.uid"
                                      :prop="item"
                                      :label="item"
                                      sortable
@@ -38,6 +38,23 @@
                             <i class="el-icon-video-pause" v-else-if="scope.row['生产状态']=='1'" style="color: green;font-size: 1rem;font-weight: bolder"></i>
                             <i class="el-icon-circle-check" v-else style="color: orange;font-size: 1rem;font-weight: bolder"></i>
                             {{scope.row['生产状态']=='0'||!scope.row['生产状态']?'未生产':(scope.row['生产状态']=='1'?'生产中':'已完成')}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column v-else-if="item==='完成比例'" :key="item.uid"
+                                     :prop="item"
+                                     :label="item"
+                                     sortable
+                                     show-overflow-tooltip
+                                     :min-width="120"
+                                     align="center"
+                    >
+                        <template slot-scope="scope">
+                            <div v-if="scope.row['完成比例']==null">
+                                <el-progress :text-inside="true" :stroke-width="20" :percentage="0" :color="customColors"></el-progress>
+                            </div>
+                            <div v-else style="font-size: 12px">
+                                <el-progress :text-inside="true" :stroke-width="15" :percentage="scope.row['完成比例']" color="#28A745"></el-progress>
+                            </div>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -62,7 +79,7 @@
                     :page-size="pagesize"
                     :total="tableCount">
             </el-pagination>
-            <GanteWrap :drawer="GanteWrapFlag" @GanTeClose="GanTeClose" :OpMessage="OpMessage" :SelectWorkItem="SelectWorkItem"></GanteWrap>
+            <GanteWrap :drawer="GanteWrapFlag" @GanTeClose="GanTeClose" :OpMessage="OpMessage" :SelectWorkItem="SelectWorkItem" />
         </div>
     </div>
 </template>
@@ -210,9 +227,11 @@
                             "workType":this.workItemType.type?this.workItemType.type:''
                         },
                     }).then(res => {
+                        console.log(res);
                         res.data = JSON.parse(res.data);
                         this.tableData.push(...res.data);
                         this.tableCount = res.total;
+                        // this.$Fun.JSONToOrderExcelConvertor(res.data);
                         resolve(res);
                     });
                 })
@@ -284,7 +303,6 @@
     [v-cloak] {
         display: none;
     }
-
     html, body {
         width: 100%;
         height: 100%;
@@ -323,6 +341,9 @@
               background-color: #b0f7b3;
             color: black;
           }
+        .el-table /deep/ .el-progress-bar__innerText{
+            color: #000;
+        }
         #table {
             position: relative;
             margin-top: 15px;
