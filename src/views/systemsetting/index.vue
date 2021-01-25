@@ -154,6 +154,23 @@
             </el-table>
           </div>
         </el-tab-pane>
+        <el-dialog title="修改字段的顺序" :visible.sync="changeOrderVisible">
+          <el-form :model="changeOrderColumn">
+            <el-form-item label="数据库字段" label-width="120px">
+              <el-input :placeholder="changeOrderColumn.sqlNameT" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="展示字段" label-width="120px">
+              <el-input :disabled="true" :placeholder="changeOrderColumn.showNameT"></el-input>
+            </el-form-item>
+            <el-form-item label="显示顺序" label-width="120px">
+              <el-input v-model="changeOrderColumnNew.indexNameT" :placeholder="changeOrderColumn.indexNameT"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="cancelChangeOrder">取 消</el-button>
+            <el-button type="primary" @click="confirmChangeOrder">确 定</el-button>
+          </div>
+        </el-dialog>
       </template>
       </Tabs>
     </template>
@@ -183,6 +200,12 @@
           showNameT:'',//前端表格要展示的名称
           width:'',//前端表格要展示的宽度
         },
+        changeOrderColumn:{},//修改展示顺序的字段
+        changeOrderColumnNew:{
+          indexNameT:'',
+        },//修改后展示顺序的字段
+        changeOrderVisible:false,//修改展示顺序的模态框是否显示
+        changeOrderIndex:'',//修改哪一条数据
       }
     },
     computed:{
@@ -278,8 +301,35 @@
         this.confirmChange();
       },//修改是否精确筛选的按钮
       changeOrder(index,row){
-        console.log(index,row);
+        this.changeOrderColumn = row;
+        this.changeOrderIndex = index;
+        this.changeOrderVisible = true;
       },
+      cancelChangeOrder(){
+        //取消修改顺序
+        this.changeOrderVisible = false;
+        this.changeOrderColumn = {};
+        this.changeOrderIndex = '';
+        this.changeOrderColumnNew['indexNameT'] = '';
+      },
+      confirmChangeOrder(){
+        //确定修改展示顺序
+        this.tableData[this.changeOrderIndex]['indexNameT'] = this.changeOrderColumnNew['indexNameT'];
+        this.$http({
+          url:'SetTableFiled',
+          data:{
+            'tableName': 'SQLWorkOrderFiled',
+            'targetChange': this.changeOrderColumn['sqlNameT'],
+            'changeData': JSON.stringify(this.tableData[this.changeOrderIndex])
+          }
+        }).then(()=>{
+          this.changeOrderVisible = false;
+          this.changeOrderColumn = {};
+          this.tableData[this.changeOrderIndex]['indexNameT'] = this.changeOrderColumnNew['indexNameT'];
+          this.changeOrderColumnNew['indexNameT'] = '';
+          this.tableData = this.tableData.sort((a,b)=>a["indexNameT"]-b["indexNameT"]);
+        });
+      }
     }
   }
 </script>
