@@ -32,7 +32,9 @@ const http = options => {
             if (res.status == 200) {
                 //这里需要获取返回的data中的数据即可
                 if (res.data === 301){
-                    // window.location.replace('/');
+                    //返回到登录页面
+                    window.location.replace('/');
+                  // $router.replace('/')
                 } else{
                     resolve(res.data);
                 }
@@ -40,7 +42,7 @@ const http = options => {
                 reject(res);
             }
         }).catch(err => {
-           window.location.replace(',');
+          window.location.replace('/');
             reject(err);
         })
     });
