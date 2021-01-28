@@ -145,7 +145,6 @@
             this.curDayShift = res['curdayshift'];
             this.dayShift = [];
             this.dayShift = [...res['dayShift']];
-            console.log(this.dayShift);
             resolve(res)
           });
         })
@@ -177,7 +176,6 @@
         //设备的点击事件
         this.curRes = item;
         this.curResProductAttr = this.curRes['resorderbean'] == null ? {} : this.curRes['resorderbean'];
-        console.log(this.curResProductAttr);
         this.GetCurResProduct().then(res => {
           this.Equipment = res;
           return this.GetProductFinish();
@@ -198,7 +196,6 @@
       },
       GetResEventData(){
         //获取事件记录
-        console.log('获取事件记录');//默认获取一整天的事件记录
         this.$http({
           url:"GetResEventData",
           data:{

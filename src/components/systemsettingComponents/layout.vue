@@ -1,6 +1,8 @@
 <template>
   <el-container class="ContentWrap">
-    <el-aside width="200px"><Nav></Nav></el-aside>
+    <el-aside width="200px">
+      <Nav></Nav>
+    </el-aside>
     <el-main class="adminContent">
       <TopTitle></TopTitle>
       <slot name="main" class="adminMain"></slot>
@@ -34,7 +36,4 @@
     background-color: #f4f4f4;
     padding: 15px;
   }
-  /*/deep/ .el-aside{*/
-    /*width: auto !important;*/
-  /*}*/
 </style>

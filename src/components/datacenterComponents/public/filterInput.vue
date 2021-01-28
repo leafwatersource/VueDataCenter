@@ -30,9 +30,6 @@
         filterjs: null,//精确筛选的对象
       }
     },
-    beforeUpdate() {
-      console.log(this.columnsJson)
-    },
     methods: {
       closeFilter() {
         //高级筛选框的关闭按钮

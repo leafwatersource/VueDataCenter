@@ -283,16 +283,22 @@
               "PageSize": this.pagesize,
               "CurPage": curPage ? curPage : "1",
               "filter": filter ? JSON.stringify(filter) : null,
-              "fuzzyFilter": this.fuzzyFilter,
+              "fuzzyFilter": this.fuzzyFilter.trim(),
               "workType": this.workItemType.type ? this.workItemType.type : '',
               "filterFirstDemandDay":this.filterFirstDemandDay?JSON.stringify(this.filterFirstDemandDay):this.filterFirstDemandDay
             },
           }).then(res => {
-            console.log(res)
             res.data = JSON.parse(res.data);
             this.tableData.push(...res.data);
             this.tableCount = res.total;
-            // this.$Fun.JSONToOrderExcelConvertor(res.data);
+            const planStartTime = this.columnsJson.filter(item=>item['key']==="planStartTime")[0];
+            const planFinishTime = this.columnsJson.filter(item=>item['key']==="planFinishTime")[0];
+            const firstDemandDay = this.columnsJson.filter(item=>item['key']==="firstDemandDay")[0];
+            this.tableData.forEach(item=>{
+              item[planStartTime['value']] = this.$Fun.formateTime(item[planStartTime['value']],true);
+              item[planFinishTime['value']] = this.$Fun.formateTime(item[planFinishTime['value']],true);
+              item[firstDemandDay['value']] = this.$Fun.foramateDate(item[firstDemandDay['value']]);
+            });
             resolve(res);
           });
         })
@@ -327,9 +333,6 @@
             }
           });
           return this.getDataCenter();
-        }).catch(error => {
-          //异常操作
-          console.log(error);
         })
       },
       handleCurrentChange: function (currentPage) {

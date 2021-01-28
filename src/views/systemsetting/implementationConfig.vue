@@ -78,6 +78,9 @@
                   <el-form-item label="展示字段" label-width="120px">
                     <el-input v-model="newColumn.showNameT" autocomplete="off"></el-input>
                   </el-form-item>
+                  <el-form-item label="展示顺序" label-width="120px">
+                    <el-input v-model="newColumn.indexNameT" autocomplete="off"></el-input>
+                  </el-form-item>
                   <el-form-item label="展示宽度" label-width="120px">
                     <el-input v-model="newColumn.width" autocomplete="off"></el-input>
                   </el-form-item>
@@ -128,7 +131,6 @@
   import Layout from '../../components/systemsettingComponents/layout'
   import Tabs from '../../components/systemsettingComponents/tabs'
   import {mapMutations} from 'vuex'
-
   export default {
     name: "implementationConfig",
     components: {

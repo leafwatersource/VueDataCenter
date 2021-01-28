@@ -3,18 +3,17 @@
     <template v-slot:main>
       <div class="wrap" :class="{'WrapShow':!NavShow}">
         <h2>手机报工操作记录</h2>
-        <p>
-          <span @click="TodayData">查询今天的数据</span>
-          <span @click="WeekData">查询最近七天</span>
-          <span @click="MonthData">查询最近一个月</span>
-          <span @click="ThreeMonthData">查询最近三个月</span>
-          <span @click="HalfYearData">查询最近半年</span>
-          <span @click="AllData" class="active">全部数据</span>
-        </p>
-        <!--<p>-->
-        <!--<input type="text" placeholder="模糊查询">-->
-        <!--</p>-->
         <div id="table" style="margin-top: 15px;">
+          <filterInput :columnsJson="columnsData" :filterBox="filterBox" @UpdatefilterBox="UpdatefilterBox"
+                       @updateData="updateData" />
+          <!--<input type="text" class="fuzzyInp" placeholder="" v-model="" >-->
+          <el-input
+            placeholder="请输入产品或工单"
+            size="mini"
+            v-model.trim="fuzzyFilter"
+            @input="getTableData"
+            clearable>
+          </el-input>
           <el-table
             :data="tableData"
             border
@@ -27,7 +26,22 @@
             :height="tableOffset"
           >
             <template v-for="item in columnsData">
+              <el-table-column v-if="item.key==='TaskFinishState'"
+                               :key="item.key"
+                               :prop="item.value"
+                               :label="item.value"
+                               sortable
+                               show-overflow-tooltip
+                               :width="item.width"
+                               align="center"
+              >
+                <template slot-scope="scope">
+                  {{scope.row['完成状态']=='1'?'正在切换':(scope.row['完成状态']=='2'?'正在生产':(scope.row['完成状态']=='3'?
+                  '订单暂停':(scope.row['完成状态']=='4' || scope.row['完成状态']=='5')?'订单完成':''))}}
+                </template>
+              </el-table-column>
               <el-table-column
+                v-else
                 :key="item.key"
                 :prop="item.value"
                 :label="item.value"
@@ -57,10 +71,13 @@
 <script>
   import Layout from '../../components/datacenterComponents/public/layout'
   import {mapState,mapMutations} from 'vuex'
+  import filterInput  from '../../components/datacenterComponents/public/filterInput'
+
   export default {
     name: "history",
     components: {
-      Layout
+      Layout,
+      filterInput
     },
     data() {
       return {
@@ -71,7 +88,9 @@
         pagesize: 20,//一页多少条数据
         tableData: [],//表格的数据
         tableOffset: null,//表格的高度
-        filter: '',//表格筛选条件
+        filter: {},//表格精确筛选条件
+        filterBox: false,//是否显示精确筛选的框
+        fuzzyFilter:'',//模糊筛选
       }
     },
     computed: {
@@ -89,18 +108,23 @@
       renderPage(){
         //页面初始化
         this.getTableCounmns().then(res=>{
-          console.log(res);
+          //key: "jobFinished"
+          // switchNameT: false
+          // value: "生产状态"
+          // width: "120"
+          res = res.sort((a,b)=>a['indexNameT']-b['indexNameT']);
           this.columnsData = [];
           res.forEach(item=>{
-            let obj = {};
             for(let prop in item){
+              let obj = {};
               if(prop !== 'type' && prop !== 'width' && prop.indexOf('NameT')===-1){
                 obj['key'] = prop;
                 obj['value'] = item[prop];
+                obj['switchNameT'] = item['switchNameT'] !== "False";
+                obj['width'] = item['width'];
+                this.columnsData.push(obj);
               }
             }
-            obj['width'] = item['width'];
-            this.columnsData.push(obj);
           });
           return this.getTableData();
         })
@@ -109,12 +133,7 @@
         //设置表格的高度
         let offsetTop = document.getElementById('table').offsetTop;
         let wrapH = document.getElementsByClassName('el-main')[0].clientHeight;
-        this.tableOffset = wrapH - offsetTop;
-        // window.onresize = ()=>{
-        //     offsetTop = document.getElementById('table').offsetTop;
-        //     let wrapH = document.getElementsByClassName('wrap')[0].clientHeight;
-        //     this.tableOffset = wrapH - offsetTop;
-        // }
+        this.tableOffset = wrapH - offsetTop-30;
       },
       getTableCounmns(){
         //获取表格的列名
@@ -138,13 +157,18 @@
             data: {
               "PageSize": this.pagesize,
               "CurPage": this.currentPage,
-              "filter": this.filter,
+              "filter":JSON.stringify(this.filter),
+              "fuzzyFilter": this.fuzzyFilter,
             }
           }).then(res => {
             this.tableCount = res.data['total'];
             this.tableData = [];
             res.data['rows'] = JSON.parse(res.data['rows']);
             this.tableData = res.data['rows'];
+            const time = this.columnsData.filter(item=>item['key'] === 'dailyDate')[0];
+            this.tableData.forEach(item=>{
+              item[time['value']] = this.$Fun.foramateDate(item[time['value']]);
+            })
           })
         })
       },
@@ -159,53 +183,19 @@
         this.currentPage = 1;
         this.getTableData();
       },
-      TodayData(e) {
-        //获取今天的数据
-        this.filter = this.$Fun.getCusDateTime('today');
+      UpdatefilterBox(val) {
+        //筛选框子组件向父组件传递是否隐藏
+        this.filterBox = val;
+      },
+      updateData(filterjs) {
+        //根据子组件传来的筛选值更新数据
         this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
+        this.filter= filterjs||{};
         this.getTableData();
       },
-      ThreeMonthData(e) {
-        //获取近三个月的数据
-        this.filter = this.$Fun.getCusDateTime('ThreeMonth');
-        this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
-        this.getTableData();
-      },
-      WeekData(e) {
-        //获取一周内的数据
-        this.filter = this.$Fun.getCusDateTime('week');
-        this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
-        this.getTableData();
-      },
-      MonthData(e) {
-        //获取一个月内的数据
-        this.filter = this.$Fun.getCusDateTime('month');
-        this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
-        this.getTableData();
-      },
-      HalfYearData(e) {
-        //获取半年内的数据
-        this.filter = this.$Fun.getCusDateTime('HalfYear');
-        this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
-        this.getTableData();
-      },
-      AllData(e) {
-        //获取所有的数据
-        this.filter = "";
-        this.currentPage = 1;
-        document.getElementsByClassName('active')[0].classList.remove('active');
-        e.target.classList.add('active');
-        this.getTableData();
+      fuzzyInp(){
+        //模糊筛选
+
       }
     }
   }
@@ -228,8 +218,14 @@
     padding: 2px 6px;
     border-radius: 4px;
   }
+  #table {
+    position: relative;
+  }
   /deep/ .el-table .cell{
     height: 28px !important;
     white-space: nowrap;
+  }
+  /deep/ #table .el-input {
+    width: auto;
   }
 </style>

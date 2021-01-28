@@ -340,7 +340,6 @@
           this.$http({
             url:'readShowChangePlan'
           }).then(data=>{
-            console.log(data);
             this.setSwitchVal(data);
           })
         }

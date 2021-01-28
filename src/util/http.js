@@ -5,7 +5,7 @@ import cookie from 'vue-cookie'
 import baseUrl from './config';
 // console.log(baseUrl)
 // BeiTeApi TengLongAPi   WoodFastApi  Local
-var api = baseUrl['Local'];
+var api = baseUrl['WoodFastApi'];
 const http = options => {
     return new Promise((resolve, reject) => {
         const defaultOptions = {};
@@ -22,7 +22,6 @@ const http = options => {
             'token':token,
             'sysID':sysID
         };
-        //这里可以在调用的时候看到method、url、data、headers等参数
         axios({
             method: 'post',
             url: api+newOptions.url,
@@ -34,7 +33,6 @@ const http = options => {
                 if (res.data === 301){
                     //返回到登录页面
                     window.location.replace('/');
-                  // $router.replace('/')
                 } else{
                     resolve(res.data);
                 }
